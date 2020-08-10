@@ -6,7 +6,7 @@ import (
 	"github.com/filecoin-project/filecoin-ffi/generated"
 )
 
-// #cgo LDFLAGS: ${SRCDIR}/libfilcrypto.a
+// #cgo LDFLAGS: ${SRCDIR}/libfilcrypto.a -lhugetlbfs
 // #cgo pkg-config: ${SRCDIR}/filcrypto.pc
 // #include "./filcrypto.h"
 import "C"
