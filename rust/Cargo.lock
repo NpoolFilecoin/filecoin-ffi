@@ -794,10 +794,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "filecoin-proofs"
+name = "filecoin-proofs-api"
+version = "4.0.2"
+dependencies = [
+ "anyhow",
+ "filecoin-proofs-v1",
+ "paired",
+ "serde",
+]
+
+[[package]]
+name = "filecoin-proofs-v1"
 version = "4.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b452e9ccddc7dcdb4e5b139092d049b448c1dad451e1835c8ad941cc3ad8ad3a"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -822,6 +830,7 @@ dependencies = [
  "indicatif",
  "itertools 0.9.0",
  "lazy_static",
+ "libc",
  "log",
  "memmap",
  "merkletree",
@@ -846,18 +855,6 @@ dependencies = [
  "tar",
  "tee",
  "typenum",
-]
-
-[[package]]
-name = "filecoin-proofs-api"
-version = "4.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff3e7829514fc351343d1bc5fd00d8b91b6a88ee75d074826c9bd07b9fdefa80"
-dependencies = [
- "anyhow",
- "filecoin-proofs",
- "paired",
- "serde",
 ]
 
 [[package]]
@@ -2287,8 +2284,6 @@ dependencies = [
 [[package]]
 name = "sha2raw"
 version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6067924a813cc16b4df9df5fde0d94bdcf441e49f0b0de52f4d0a89b6988893"
 dependencies = [
  "block-buffer",
  "digest",
@@ -2342,8 +2337,6 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "storage-proofs"
 version = "4.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6b3434dd7de25ec63925799a71456f4b89674a430900365c07e05605cf6886b"
 dependencies = [
  "storage-proofs-core",
  "storage-proofs-porep",
@@ -2353,8 +2346,6 @@ dependencies = [
 [[package]]
 name = "storage-proofs-core"
 version = "4.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b2ca9754cc550a3523d0b94a8c5fe2007e78c3c695edf358bfc61bc17b9f597"
 dependencies = [
  "aes",
  "anyhow",
@@ -2391,8 +2382,6 @@ dependencies = [
 [[package]]
 name = "storage-proofs-porep"
 version = "4.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b49d0b1cf21badabe42b76d60705c73e5759f86b35436f79c60bdb23a392d2fe"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -2401,6 +2390,7 @@ dependencies = [
  "fil-sapling-crypto",
  "generic-array 0.13.2",
  "hex",
+ "libc",
  "log",
  "memmap",
  "merkletree",
@@ -2422,8 +2412,6 @@ dependencies = [
 [[package]]
 name = "storage-proofs-post"
 version = "4.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41e0659dad068da1e16c78ca6f6dd03daa6ecc583bb49c2b05e897ca2cebd3f0"
 dependencies = [
  "anyhow",
  "bellperson",
