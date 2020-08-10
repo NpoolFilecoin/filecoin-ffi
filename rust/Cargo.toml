@@ -28,7 +28,7 @@ rayon = "1.2.1"
 anyhow = "1.0.23"
 bellperson = { version = "0.9.2", features = ["gpu"] }
 serde_json = "1.0.46"
-filecoin-proofs-api = { git = "https://github.com/EntropyPool/rust-filecoin-proofs-api" tag = "filecoin-proofs-api-entropypool-4.0.2.1" }
+filecoin-proofs-api = { git = "../../../rust-filecoin-proofs-api" tag = "filecoin-proofs-api-entropypool-4.0.2.1" }
 
 [build-dependencies]
 cbindgen = "= 0.14.0"
