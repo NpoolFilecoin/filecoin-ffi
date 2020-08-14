@@ -146,7 +146,9 @@ build_from_source() {
     # reduce array of features into the rustc-specific 'target-feature' flag
     # shellcheck disable=SC2068 # the splitting is intentional
     for x in ${optimized_release_rustc_target_features[@]}; do
-        __target_feature="${x},${__target_feature}"
+        feature=`echo $x | awk -F "+" '{print $2}'`
+        lscpu | grep " $feature "
+        [ $? -eq 0 ] && __target_feature="${x},${__target_feature}"
     done
 
     if [ "${__release_type}" = "optimized" ]; then
