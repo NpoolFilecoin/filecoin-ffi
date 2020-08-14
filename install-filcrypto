@@ -146,11 +146,11 @@ build_from_source() {
     # reduce array of features into the rustc-specific 'target-feature' flag
     # shellcheck disable=SC2068 # the splitting is intentional
     for x in ${optimized_release_rustc_target_features[@]}; do
-        __stripped="echo $x | awk -F '+' '{print $2}'"
-        __feature=$(eval "${__stripped}")
+	__stripped="echo $x | awk -F '+' '{print \$2}' | sed 's/\./_/g'"
+	__feature=$(eval "${__stripped}")
         __searched="cat /proc/cpuinfo | grep flags"
         __features=$(eval "${__searched}")
-        if [ ! -n "${__features##*${__feature}*}" ]; then
+        if [ ! -n "${__features##* ${__feature} *}" ]; then
             __target_feature="${x},${__target_feature}"
         fi
     done
