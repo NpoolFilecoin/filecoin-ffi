@@ -4,7 +4,7 @@
 set -Exeo pipefail
 auth_header=()
 if [ -n "${GITHUB_TOKEN}" ]; then
-	auth_header=("-H" "Authorization: token ${GITHUB_TOKEN}")
+    auth_header=("-H" "Authorization: token ${GITHUB_TOKEN}")
 fi
 
 # set CWD to the root of filecoin-ffi
@@ -146,9 +146,13 @@ build_from_source() {
     # reduce array of features into the rustc-specific 'target-feature' flag
     # shellcheck disable=SC2068 # the splitting is intentional
     for x in ${optimized_release_rustc_target_features[@]}; do
-        feature=`echo $x | awk -F "+" '{print $2}'`
-        lscpu | grep " $feature "
-        [ $? -eq 0 ] && __target_feature="${x},${__target_feature}"
+        __stripped="echo $x | awk -F '+' '{print $2}'"
+        __feature=$(eval "${__stripped}")
+        __searched="cat /proc/cpuinfo | grep flags"
+        __features=$(eval "${__searched}")
+        if [ ! -n "${__features##*${__feature}*}" ]; then
+            __target_feature="${x},${__target_feature}"
+        fi
     done
 
     if [ "${__release_type}" = "optimized" ]; then
