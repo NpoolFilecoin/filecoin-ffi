@@ -153,6 +153,9 @@ build_from_source() {
         if [ ! -n "${__features##* ${__feature} *}" ]; then
             __target_feature="${x},${__target_feature}"
         fi
+        if [ "sha" == "$__feature" -a ! -n "${__features##* "sha_ni" *}" ]; then
+            __target_feature="${x}"
+        fi
     done
 
     if [ "${__release_type}" = "optimized" ]; then
