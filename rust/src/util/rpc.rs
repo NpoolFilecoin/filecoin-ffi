@@ -1,4 +1,4 @@
-use std::{fs, thread, time};
+use std::{thread, time};
 
 use filecoin_webapi::polling::PollingState;
 use log::{info, trace};
@@ -6,10 +6,11 @@ use reqwest::blocking::Client;
 use serde::ser::Serialize;
 use serde_json::value::from_value;
 use serde_json::{json, Value};
+use std::env;
 
 lazy_static! {
     static ref REQWEST_CLIENT: Client = Client::new();
-    static ref HOST: String = fs::read_to_string("/etc/filecoin-webapi.conf").unwrap();
+    static ref HOST: String = env::var("FFI_REMOTE_COMMIT2_BASE_URL").unwrap();
 }
 
 #[allow(dead_code)]
