@@ -24,68 +24,6 @@ use tarpc::{client, context};
 use tokio::runtime::Runtime;
 use tokio_serde::formats::Json;
 
-lazy_static! {
-    static ref RUNTIME: Mutex<Runtime> = { Mutex::new(Runtime::new().unwrap()) };
-    static ref RPC_CLIENT: Mutex<SchedulerClient> = {
-        let r = async {
-            let server_addr: SocketAddr = "127.0.0.1:6000".parse().unwrap();
-            let transport = tarpc::serde_transport::tcp::connect(server_addr, Json::default())
-                .await
-                .unwrap();
-            SchedulerClient::new(client::Config::default(), transport)
-                .spawn()
-                .unwrap()
-        };
-
-        let mut rt = RUNTIME.lock().unwrap();
-        let client = rt.block_on(r);
-
-        Mutex::new(client)
-    };
-}
-
-#[tarpc::service]
-pub trait Scheduler {
-    async fn get_cond(cond: String) -> Option<u64>;
-    async fn remove_guard(token: u64) -> Option<bool>;
-}
-
-struct TokenGuard(u64);
-
-impl TokenGuard {
-    fn new(token: u64) -> Self {
-        TokenGuard(token)
-    }
-}
-
-impl std::ops::Drop for TokenGuard {
-    fn drop(&mut self) {
-        let mut client = RPC_CLIENT.lock().unwrap();
-        let r = async { client.remove_guard(context::current(), self.0).await.unwrap() };
-        let mut rt = RUNTIME.lock().unwrap();
-        rt.block_on(r);
-    }
-}
-
-macro_rules! wait_cond {
-    ($cond:expr, $time:expr) => {{
-        let mut client = RPC_CLIENT.lock().unwrap();
-        let r = async {
-            loop {
-                let x = client.get_cond(context::current(), $cond).await;
-                if let Ok(Some(t)) = x {
-                    return t;
-                }
-
-                std::thread::sleep(std::time::Duration::from_secs($time));
-            }
-        };
-
-        let mut rt = RUNTIME.lock().unwrap();
-        TokenGuard::new(rt.block_on(r))
-    }};
-}
-
 /// TODO: document
 ///
 #[no_mangle]
@@ -269,8 +207,6 @@ pub unsafe extern "C" fn fil_seal_pre_commit_phase1(
 
         info!("seal_pre_commit_phase1: start");
 
-        let _guard = wait_cond!("P1".to_string(), 30);
-
         let public_pieces: Vec<PieceInfo> = from_raw_parts(pieces_ptr, pieces_len)
             .iter()
             .cloned()
@@ -323,8 +259,6 @@ pub unsafe extern "C" fn fil_seal_pre_commit_phase2(
         init_log();
 
         info!("seal_pre_commit_phase2: start");
-
-        let _guard = wait_cond!("P2".to_string(), 30);
 
         let mut response: fil_SealPreCommitPhase2Response = Default::default();
 
@@ -382,8 +316,6 @@ pub unsafe extern "C" fn fil_seal_commit_phase1(
 
         info!("seal_commit_phase1: start");
 
-        let _guard = wait_cond!("C1".to_string(), 30);
-
         let mut response = fil_SealCommitPhase1Response::default();
 
         let spcp2o = SealPreCommitPhase2Output {
@@ -439,8 +371,6 @@ pub unsafe extern "C" fn fil_seal_commit_phase2(
         init_log();
 
         info!("seal_commit_phase2: start");
-
-        let _guard = wait_cond!("C2".to_string(), 30);
 
         let mut response = fil_SealCommitPhase2Response::default();
 
