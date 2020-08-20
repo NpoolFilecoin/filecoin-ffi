@@ -8,4 +8,5 @@ filcrypto.pc
 filecoin.h
 filecoin.pc
 *.a
+Cargo.lock
 simulator
