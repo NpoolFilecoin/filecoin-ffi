@@ -10,19 +10,14 @@ use filecoin_webapi::*;
 use log::info;
 use std::mem;
 use std::env;
-use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::slice::from_raw_parts;
-use std::sync::Mutex;
 
 use super::helpers::{c_to_rust_post_proofs, to_private_replica_info_map};
 use super::types::*;
 use crate::util::api::init_log;
 
 use serde_json::json;
-use tarpc::{client, context};
-use tokio::runtime::Runtime;
-use tokio_serde::formats::Json;
 
 /// TODO: document
 ///
