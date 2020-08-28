@@ -9,7 +9,10 @@ use serde_json::{json, Value};
 use std::env;
 
 lazy_static! {
-    static ref REQWEST_CLIENT: Client = Client::new();
+    static ref REQWEST_CLIENT: Client = Client::builder()
+        .timeout(time::Duration::from_secs(30))
+        .build()
+        .expect("cannot create http client");
     static ref HOST: String = env::var("FFI_REMOTE_COMMIT2_BASE_URL").unwrap();
 }
 
