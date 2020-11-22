@@ -11,3 +11,4 @@ filecoin.pc
 Cargo.lock
 simulator
 Cargo.lock
+rust/Cargo.lock
