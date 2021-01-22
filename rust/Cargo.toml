@@ -45,7 +45,7 @@ neptune = "=1.1.1"
 neptune-triton = "=1.0.0"
 
 filecoin-proofs-api = { path = "../../../../rust-filecoin-proofs-api", default-features = false }
-filecoin-webapi = { path = "../../../../filecoin-webapi" }
+filecoin-webapi = { path = "../../../../filecoin-webapi", default-features = false }
 
 [build-dependencies]
 cbindgen = "= 0.14.0"
@@ -55,5 +55,5 @@ tempfile = "3.0.8"
 
 [features]
 default = ["pairing"]
-pairing = ["filecoin-proofs-api/pairing", "bellperson/pairing"]
-blst = ["filecoin-proofs-api/blst", "bellperson/blst"]
+pairing = ["filecoin-proofs-api/pairing", "filecoin-webapi/pairing","bellperson/pairing"]
+blst = ["filecoin-proofs-api/blst","filecoin-webapi/blst", "bellperson/blst"]
