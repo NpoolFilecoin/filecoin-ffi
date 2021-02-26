@@ -8,7 +8,7 @@ authors = [
   "laser <l@s3r.com>"
 ]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/filecoin-project/filecoin-ffi"
+repository = "https://github.com/EntropyPool/filecoin-ffi"
 readme = "README.md"
 edition = "2018"
 publish = false
@@ -31,14 +31,23 @@ rand = "0.7"
 rand_chacha = "0.2.1"
 rayon = "1.2.1"
 anyhow = "1.0.23"
-bellperson = { version = "0.12.0", default-features = false, features = ["gpu"] }
+bellperson = { path = "../../../../bellperson", default-features = false, features = ["cuda"]}
 serde_json = "1.0.46"
+
 rust-gpu-tools = "0.2.0"
 
-[dependencies.filecoin-proofs-api]
-package = "filecoin-proofs-api"
-version = "5.4.1"
-default-features = false
+serde = "^1.0"
+lazy_static = "^1.4"
+reqwest = { version = "^0.10", features = ["blocking", "json"] }
+tarpc = { version = "*", features = ["full"] }
+tokio = { version = "*", features = ["full"] }
+tokio-serde = { version = "*", features = ["json"] }
+
+neptune = "=1.1.1"
+neptune-triton = "=1.0.0"
+
+filecoin-proofs-api = { path = "../../../../rust-filecoin-proofs-api", default-features = false }
+filecoin-webapi = { path = "../../../../filecoin-webapi", default-features = false }
 
 [build-dependencies]
 cbindgen = "= 0.14.0"
@@ -48,6 +57,6 @@ tempfile = "3.0.8"
 
 [features]
 default = ["pairing"]
-pairing = ["filecoin-proofs-api/pairing", "bellperson/pairing"]
-blst = ["filecoin-proofs-api/blst", "bellperson/blst"]
+pairing = ["filecoin-proofs-api/pairing", "filecoin-webapi/pairing","bellperson/pairing"]
+blst = ["filecoin-proofs-api/blst", "filecoin-webapi/blst", "bellperson/blst"]
 blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]

@@ -4,7 +4,7 @@
 set -Exeo pipefail
 auth_header=()
 if [ -n "${GITHUB_TOKEN}" ]; then
-	auth_header=("-H" "Authorization: token ${GITHUB_TOKEN}")
+    auth_header=("-H" "Authorization: token ${GITHUB_TOKEN}")
 fi
 
 # set CWD to the root of filecoin-ffi
