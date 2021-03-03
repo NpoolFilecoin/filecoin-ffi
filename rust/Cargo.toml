@@ -60,3 +60,6 @@ default = ["pairing"]
 pairing = ["filecoin-proofs-api/pairing", "filecoin-webapi/pairing","bellperson/pairing"]
 blst = ["filecoin-proofs-api/blst", "filecoin-webapi/blst", "bellperson/blst"]
 blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
+
+[patch.crates-io]
+merkletree = { path = "../../../../merkletree" }
