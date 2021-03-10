@@ -51,3 +51,7 @@ default = ["pairing"]
 pairing = ["filecoin-proofs-api/pairing", "bellperson/pairing"]
 blst = ["filecoin-proofs-api/blst", "bellperson/blst"]
 blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
+
+[patch.crates-io]
+filecoin-proofs = { path = "../../../../rust-fil-proofs/filecoin-proofs", default-features = false, features = ["gpu"] }
+merkletree = { path = "../../../../merkletree" }

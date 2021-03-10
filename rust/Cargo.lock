@@ -934,8 +934,6 @@ dependencies = [
 [[package]]
 name = "filecoin-proofs"
 version = "5.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c49a59b1148dcdb4711bec11faa88f8b350a4edd8326d2bb7b2437c4a019fbec"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -1558,8 +1556,6 @@ dependencies = [
 [[package]]
 name = "merkletree"
 version = "0.21.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2202d6eb93a775e0a619fc08924b341d0cf12d6e0f064ee52d24311de45b925b"
 dependencies = [
  "anyhow",
  "arrayref",
@@ -2564,15 +2560,14 @@ dependencies = [
 [[package]]
 name = "sha2raw"
 version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57da614e847c49a01979ffa0d9a030d983c4bb6e78a13ff20203a0169deeff42"
 dependencies = [
- "block-buffer 0.7.3",
+ "block-buffer 0.9.0",
+ "byteorder 1.4.2",
  "cpuid-bool",
  "digest 0.9.0",
  "fake-simd",
  "lazy_static",
- "opaque-debug 0.2.3",
+ "opaque-debug 0.3.0",
  "sha2-asm",
 ]
 
@@ -2613,8 +2608,6 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 [[package]]
 name = "storage-proofs"
 version = "5.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12e40112e2867c532f611c3fc4af826a6e9db2144e269fda545826375bafb084"
 dependencies = [
  "storage-proofs-core",
  "storage-proofs-porep",
@@ -2624,8 +2617,6 @@ dependencies = [
 [[package]]
 name = "storage-proofs-core"
 version = "5.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "191e0ad20e15d20dd2a173338816970d74654f0fd0ae89db188e9993760b98cb"
 dependencies = [
  "aes",
  "anyhow",
@@ -2660,8 +2651,6 @@ dependencies = [
 [[package]]
 name = "storage-proofs-porep"
 version = "5.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b20609e5bb968c708747c3922e6cd15661cb1515d5508bd96e0a4f1600acabe0"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -2696,8 +2685,6 @@ dependencies = [
 [[package]]
 name = "storage-proofs-post"
 version = "5.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48d3f62e46745d71c5359472a7f1017782eca46ea0c186dcb1a1cf5fad1e5c26"
 dependencies = [
  "anyhow",
  "bellperson",
