@@ -55,3 +55,4 @@ blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
 [patch.crates-io]
 filecoin-proofs = { path = "../../../../rust-fil-proofs/filecoin-proofs", default-features = false, features = ["gpu"] }
 merkletree = { path = "../../../../merkletree" }
+filecoin-proofs-api = { path = "../../../../rust-filecoin-proofs-api", default-features = false, features = ["gpu"] }

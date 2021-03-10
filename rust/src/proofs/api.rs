@@ -4,13 +4,14 @@ use ffi_toolkit::{
 use filecoin_proofs_api::seal::SealPreCommitPhase2Output;
 use filecoin_proofs_api::{
     PieceInfo, PrivateReplicaInfo, RegisteredPoStProof, RegisteredSealProof, SectorId,
-    UnpaddedByteIndex, UnpaddedBytesAmount,
+    UnpaddedByteIndex, UnpaddedBytesAmount, PrivateSectorPathInfo,
 };
 
 use log::{error, info};
 use std::mem;
 use std::path::PathBuf;
 use std::slice::from_raw_parts;
+use std::ffi::CString;
 
 use super::helpers::{c_to_rust_post_proofs, to_private_replica_info_map};
 use super::types::*;
@@ -672,11 +673,42 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
         let cache_dir_path = c_str_to_pbuf(replica.cache_dir_path);
         let replica_path = c_str_to_pbuf(replica.replica_path);
 
+        /*
         let replica_v1 = PrivateReplicaInfo::new(
             replica.registered_proof.into(),
             replica.comm_r,
             cache_dir_path,
             replica_path,
+        );
+        */
+
+        let replicaSectorPathInfo = PrivateSectorPathInfo {
+            url: CString::from_raw(replica.replica_sector_path_info.url as *mut libc::c_char).into_string().expect("fail to convert string"),
+            landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
+            access_key: CString::from_raw(replica.replica_sector_path_info.access_key as *mut libc::c_char).into_string().expect("fail to convert string"),
+            secret_key: CString::from_raw(replica.replica_sector_path_info.secret_key as *mut libc::c_char).into_string().expect("fail to convert string"),
+            bucket_name: CString::from_raw(replica.replica_sector_path_info.bucket_name as *mut libc::c_char).into_string().expect("fail to convert string"),
+            sector_name: CString::from_raw(replica.replica_sector_path_info.sector_name as *mut libc::c_char).into_string().expect("fail to convert string"),
+        };
+
+        let cacheSectorPathInfo = PrivateSectorPathInfo {
+            url: CString::from_raw(replica.cache_sector_path_info.url as *mut libc::c_char).into_string().expect("fail to convert string"),
+            landed_dir: c_str_to_pbuf(replica.cache_sector_path_info.landed_dir),
+            access_key: CString::from_raw(replica.cache_sector_path_info.access_key as *mut libc::c_char).into_string().expect("fail to convert string"),
+            secret_key: CString::from_raw(replica.cache_sector_path_info.secret_key as *mut libc::c_char).into_string().expect("fail to convert string"),
+            bucket_name: CString::from_raw(replica.cache_sector_path_info.bucket_name as *mut libc::c_char).into_string().expect("fail to convert string"),
+            sector_name: CString::from_raw(replica.cache_sector_path_info.sector_name as *mut libc::c_char).into_string().expect("fail to convert string"),
+        };
+
+        let replica_v1 = PrivateReplicaInfo::new_with_oss_config(
+            replica.registered_proof.into(),
+            replica.comm_r,
+            cache_dir_path,
+            replica.cache_in_oss,
+            cacheSectorPathInfo,
+            replica_path,
+            replica.replica_in_oss,
+            replicaSectorPathInfo,
         );
 
         let result = filecoin_proofs_api::post::generate_single_vanilla_proof(
