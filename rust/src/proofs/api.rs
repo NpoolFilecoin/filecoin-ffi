@@ -702,13 +702,13 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
 
         let replica_v1 = PrivateReplicaInfo::new_with_oss_config(
             replica.registered_proof.into(),
+            replica_path,
+            replica.replica_in_oss,
+            replicaSectorPathInfo,
             replica.comm_r,
             cache_dir_path,
             replica.cache_in_oss,
             cacheSectorPathInfo,
-            replica_path,
-            replica.replica_in_oss,
-            replicaSectorPathInfo,
         );
 
         let result = filecoin_proofs_api::post::generate_single_vanilla_proof(
