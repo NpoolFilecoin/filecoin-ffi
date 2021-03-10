@@ -662,7 +662,7 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
     catch_panic_response(|| {
         init_log();
 
-        info!("generate_single_vanilla_proof: start {:?}", replica);
+        info!("generate_single_vanilla_proof: start");
 
         let challenges: Vec<u64> = from_raw_parts(challenges_ptr, challenges_len)
             .iter()
