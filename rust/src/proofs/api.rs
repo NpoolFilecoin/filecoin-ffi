@@ -682,7 +682,7 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
         );
         */
 
-        let replicaSectorPathInfo = PrivateSectorPathInfo {
+        let replica_sector_path_info = PrivateSectorPathInfo {
             url: CString::from_raw(replica.replica_sector_path_info.url as *mut libc::c_char).into_string().expect("fail to convert string"),
             landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
             access_key: CString::from_raw(replica.replica_sector_path_info.access_key as *mut libc::c_char).into_string().expect("fail to convert string"),
@@ -691,7 +691,7 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
             sector_name: CString::from_raw(replica.replica_sector_path_info.sector_name as *mut libc::c_char).into_string().expect("fail to convert string"),
         };
 
-        let cacheSectorPathInfo = PrivateSectorPathInfo {
+        let cache_sector_path_info = PrivateSectorPathInfo {
             url: CString::from_raw(replica.cache_sector_path_info.url as *mut libc::c_char).into_string().expect("fail to convert string"),
             landed_dir: c_str_to_pbuf(replica.cache_sector_path_info.landed_dir),
             access_key: CString::from_raw(replica.cache_sector_path_info.access_key as *mut libc::c_char).into_string().expect("fail to convert string"),
@@ -704,11 +704,11 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
             replica.registered_proof.into(),
             replica_path,
             replica.replica_in_oss,
-            replicaSectorPathInfo,
+            replica_sector_path_info,
             replica.comm_r,
             cache_dir_path,
             replica.cache_in_oss,
-            cacheSectorPathInfo,
+            cache_sector_path_info,
         );
 
         let result = filecoin_proofs_api::post::generate_single_vanilla_proof(
