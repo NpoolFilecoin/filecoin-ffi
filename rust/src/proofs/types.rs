@@ -248,16 +248,18 @@ impl From<fil_PoStProof> for PoStProof {
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct fil_PrivateSectorPathInfo {
     pub url: *const libc::c_char,
     pub access_key: *const libc::c_char,
     pub secret_key: *const libc::c_char,
     pub bucket_name: *const libc::c_char,
+    pub landed_dir: *const libc::c_char,
+    pub sector_name: *const libc::c_char,
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct fil_PrivateReplicaInfo {
     pub registered_proof: fil_RegisteredPoStProof,
     pub cache_dir_path: *const libc::c_char,

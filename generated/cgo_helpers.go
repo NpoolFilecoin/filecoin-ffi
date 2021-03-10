@@ -3705,6 +3705,14 @@ func (x *FilPrivateSectorPathInfo) PassRef() (*C.fil_PrivateSectorPathInfo, *cgo
 	ref5072832a.bucket_name, cbucket_name_allocs = unpackPCharString(x.BucketName)
 	allocs5072832a.Borrow(cbucket_name_allocs)
 
+	var clanded_dir_allocs *cgoAllocMap
+	ref5072832a.landed_dir, clanded_dir_allocs = unpackPCharString(x.LandedDir)
+	allocs5072832a.Borrow(clanded_dir_allocs)
+
+	var csector_name_allocs *cgoAllocMap
+	ref5072832a.sector_name, csector_name_allocs = unpackPCharString(x.SectorName)
+	allocs5072832a.Borrow(csector_name_allocs)
+
 	x.ref5072832a = ref5072832a
 	x.allocs5072832a = allocs5072832a
 	return ref5072832a, allocs5072832a
@@ -3730,6 +3738,8 @@ func (x *FilPrivateSectorPathInfo) Deref() {
 	x.AccessKey = packPCharString(x.ref5072832a.access_key)
 	x.SecretKey = packPCharString(x.ref5072832a.secret_key)
 	x.BucketName = packPCharString(x.ref5072832a.bucket_name)
+	x.LandedDir = packPCharString(x.ref5072832a.landed_dir)
+	x.SectorName = packPCharString(x.ref5072832a.sector_name)
 }
 
 // allocFilPrivateReplicaInfoMemory allocates memory for type C.fil_PrivateReplicaInfo in C.

@@ -784,9 +784,27 @@ func toFilPrivateReplicaInfo(src PrivateSectorInfo) (generated.FilPrivateReplica
 	out := generated.FilPrivateReplicaInfo{
 		RegisteredProof: pp,
 		CacheDirPath:    src.CacheDirPath,
-		CommR:           commR.Inner,
-		ReplicaPath:     src.SealedSectorPath,
-		SectorId:        uint64(src.SectorNumber),
+		CacheInOss:      src.CacheInOss,
+		CacheSectorPathInfo: generated.FilPrivateSectorPathInfo{
+			Url:        src.CacheSectorPathInfo.Url,
+			LandedDir:  src.CacheSectorPathInfo.LandedDir,
+			AccessKey:  src.CacheSectorPathInfo.AccessKey,
+			SecretKey:  src.CacheSectorPathInfo.SecretKey,
+			BucketName: src.CacheSectorPathInfo.BucketName,
+			SectorName: src.CacheSectorPathInfo.SectorName,
+		},
+		CommR:        commR.Inner,
+		ReplicaPath:  src.SealedSectorPath,
+		ReplicaInOss: src.SealedInOss,
+		ReplicaSectorPathInfo: generated.FilPrivateSectorPathInfo{
+			Url:        src.SealedSectorPathInfo.Url,
+			LandedDir:  src.SealedSectorPathInfo.LandedDir,
+			AccessKey:  src.SealedSectorPathInfo.AccessKey,
+			SecretKey:  src.SealedSectorPathInfo.SecretKey,
+			BucketName: src.SealedSectorPathInfo.BucketName,
+			SectorName: src.SealedSectorPathInfo.SectorName,
+		},
+		SectorId: uint64(src.SectorNumber),
 	}
 	_, allocs := out.PassRef()
 	return out, allocs.Free, nil
@@ -811,9 +829,27 @@ func toFilPrivateReplicaInfos(src []PrivateSectorInfo, typ string) ([]generated.
 		out[idx] = generated.FilPrivateReplicaInfo{
 			RegisteredProof: pp,
 			CacheDirPath:    src[idx].CacheDirPath,
-			CommR:           commR.Inner,
-			ReplicaPath:     src[idx].SealedSectorPath,
-			SectorId:        uint64(src[idx].SectorNumber),
+			CacheInOss:      src[idx].CacheInOss,
+			CacheSectorPathInfo: generated.FilPrivateSectorPathInfo{
+				Url:        src[idx].CacheSectorPathInfo.Url,
+				LandedDir:  src[idx].CacheSectorPathInfo.LandedDir,
+				AccessKey:  src[idx].CacheSectorPathInfo.AccessKey,
+				SecretKey:  src[idx].CacheSectorPathInfo.SecretKey,
+				BucketName: src[idx].CacheSectorPathInfo.BucketName,
+				SectorName: src[idx].CacheSectorPathInfo.SectorName,
+			},
+			CommR:        commR.Inner,
+			ReplicaPath:  src[idx].SealedSectorPath,
+			ReplicaInOss: src[idx].SealedInOss,
+			ReplicaSectorPathInfo: generated.FilPrivateSectorPathInfo{
+				Url:        src[idx].SealedSectorPathInfo.Url,
+				LandedDir:  src[idx].SealedSectorPathInfo.LandedDir,
+				AccessKey:  src[idx].SealedSectorPathInfo.AccessKey,
+				SecretKey:  src[idx].SealedSectorPathInfo.SecretKey,
+				BucketName: src[idx].SealedSectorPathInfo.BucketName,
+				SectorName: src[idx].SealedSectorPathInfo.SectorName,
+			},
+			SectorId: uint64(src[idx].SectorNumber),
 		}
 
 		_, allocs[idx] = out[idx].PassRef()

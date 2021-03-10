@@ -121,6 +121,12 @@ type publicSectorInfo struct {
 }
 
 type PrivateSectorPathInfo struct {
+	Url        string
+	AccessKey  string
+	SecretKey  string
+	BucketName string
+	LandedDir  string
+	SectorName string
 }
 
 type PrivateSectorInfo struct {
