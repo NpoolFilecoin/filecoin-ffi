@@ -1914,9 +1914,11 @@ dependencies = [
  "positioned-io",
  "rand 0.7.3",
  "rayon",
+ "rust-s3",
  "serde",
  "tempdir",
  "tempfile",
+ "tokio",
  "typenum",
 ]
 

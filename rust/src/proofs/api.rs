@@ -1,5 +1,5 @@
 use ffi_toolkit::{
-    c_str_to_pbuf, catch_panic_response, raw_ptr, rust_str_to_c_str, FCPResponseStatus,
+    c_str_to_pbuf, catch_panic_response, raw_ptr, rust_str_to_c_str, FCPResponseStatus, c_str_to_rust_str,
 };
 use filecoin_proofs_api::seal::SealPreCommitPhase2Output;
 use filecoin_proofs_api::{
@@ -11,7 +11,6 @@ use log::{error, info};
 use std::mem;
 use std::path::PathBuf;
 use std::slice::from_raw_parts;
-use std::ffi::CString;
 
 use super::helpers::{c_to_rust_post_proofs, to_private_replica_info_map};
 use super::types::*;
@@ -683,22 +682,42 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
         */
 
         let replica_sector_path_info = PrivateSectorPathInfo {
-            url: CString::from_raw(replica.replica_sector_path_info.url as *mut libc::c_char).into_string().expect("fail to convert string"),
+            url: c_str_to_rust_str(replica.replica_sector_path_info.url as *mut libc::c_char).to_string(),
             landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
-            access_key: CString::from_raw(replica.replica_sector_path_info.access_key as *mut libc::c_char).into_string().expect("fail to convert string"),
-            secret_key: CString::from_raw(replica.replica_sector_path_info.secret_key as *mut libc::c_char).into_string().expect("fail to convert string"),
-            bucket_name: CString::from_raw(replica.replica_sector_path_info.bucket_name as *mut libc::c_char).into_string().expect("fail to convert string"),
-            sector_name: CString::from_raw(replica.replica_sector_path_info.sector_name as *mut libc::c_char).into_string().expect("fail to convert string"),
+            access_key: c_str_to_rust_str(replica.replica_sector_path_info.access_key as *mut libc::c_char).to_string(),
+            secret_key: c_str_to_rust_str(replica.replica_sector_path_info.secret_key as *mut libc::c_char).to_string(),
+            bucket_name: c_str_to_rust_str(replica.replica_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
+            sector_name: c_str_to_rust_str(replica.replica_sector_path_info.sector_name as *mut libc::c_char).to_string(),
         };
 
         let cache_sector_path_info = PrivateSectorPathInfo {
-            url: CString::from_raw(replica.cache_sector_path_info.url as *mut libc::c_char).into_string().expect("fail to convert string"),
+            url: c_str_to_rust_str(replica.cache_sector_path_info.url as *mut libc::c_char).to_string(),
             landed_dir: c_str_to_pbuf(replica.cache_sector_path_info.landed_dir),
-            access_key: CString::from_raw(replica.cache_sector_path_info.access_key as *mut libc::c_char).into_string().expect("fail to convert string"),
-            secret_key: CString::from_raw(replica.cache_sector_path_info.secret_key as *mut libc::c_char).into_string().expect("fail to convert string"),
-            bucket_name: CString::from_raw(replica.cache_sector_path_info.bucket_name as *mut libc::c_char).into_string().expect("fail to convert string"),
-            sector_name: CString::from_raw(replica.cache_sector_path_info.sector_name as *mut libc::c_char).into_string().expect("fail to convert string"),
+            access_key: c_str_to_rust_str(replica.cache_sector_path_info.access_key as *mut libc::c_char).to_string(),
+            secret_key: c_str_to_rust_str(replica.cache_sector_path_info.secret_key as *mut libc::c_char).to_string(),
+            bucket_name: c_str_to_rust_str(replica.cache_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
+            sector_name: c_str_to_rust_str(replica.cache_sector_path_info.sector_name as *mut libc::c_char).to_string(),
         };
+
+        /*
+        let replica_sector_path_info = PrivateSectorPathInfo {
+            url: "http://192.168.50.193:9000".to_string(),
+            landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
+            access_key: "admin".to_string(),
+            secret_key: "admin123456".to_string(),
+            bucket_name: "filecoin-bucket-t01002-data".to_string(),
+            sector_name: "s-t01002-0".to_string(),
+        };
+
+        let cache_sector_path_info = PrivateSectorPathInfo {
+            url: "http://192.168.50.193:9000".to_string(),
+            landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
+            access_key: "admin".to_string(),
+            secret_key: "admin123456".to_string(),
+            bucket_name: "filecoin-bucket-t01002-proof".to_string(),
+            sector_name: "s-t01002-0".to_string(),
+        };
+        */
 
         let replica_v1 = PrivateReplicaInfo::new_with_oss_config(
             replica.registered_proof.into(),
