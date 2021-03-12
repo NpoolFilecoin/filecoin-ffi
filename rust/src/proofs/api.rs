@@ -1,10 +1,10 @@
 use ffi_toolkit::{
-    c_str_to_pbuf, catch_panic_response, raw_ptr, rust_str_to_c_str, FCPResponseStatus,
+    c_str_to_pbuf, catch_panic_response, raw_ptr, rust_str_to_c_str, FCPResponseStatus, c_str_to_rust_str,
 };
 use filecoin_proofs_api::seal::{SealCommitPhase2Output, SealPreCommitPhase2Output};
 use filecoin_proofs_api::{
     PieceInfo, PrivateReplicaInfo, RegisteredPoStProof, RegisteredSealProof, SectorId,
-    UnpaddedByteIndex, UnpaddedBytesAmount,
+    UnpaddedByteIndex, UnpaddedBytesAmount, PrivateSectorPathInfo,
 };
 
 use log::{error, info};
@@ -695,11 +695,62 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
         let cache_dir_path = c_str_to_pbuf(replica.cache_dir_path);
         let replica_path = c_str_to_pbuf(replica.replica_path);
 
+        /*
         let replica_v1 = PrivateReplicaInfo::new(
             replica.registered_proof.into(),
             replica.comm_r,
             cache_dir_path,
             replica_path,
+        );
+        */
+
+        let replica_sector_path_info = PrivateSectorPathInfo {
+            url: c_str_to_rust_str(replica.replica_sector_path_info.url as *mut libc::c_char).to_string(),
+            landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
+            access_key: c_str_to_rust_str(replica.replica_sector_path_info.access_key as *mut libc::c_char).to_string(),
+            secret_key: c_str_to_rust_str(replica.replica_sector_path_info.secret_key as *mut libc::c_char).to_string(),
+            bucket_name: c_str_to_rust_str(replica.replica_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
+            sector_name: c_str_to_rust_str(replica.replica_sector_path_info.sector_name as *mut libc::c_char).to_string(),
+        };
+
+        let cache_sector_path_info = PrivateSectorPathInfo {
+            url: c_str_to_rust_str(replica.cache_sector_path_info.url as *mut libc::c_char).to_string(),
+            landed_dir: c_str_to_pbuf(replica.cache_sector_path_info.landed_dir),
+            access_key: c_str_to_rust_str(replica.cache_sector_path_info.access_key as *mut libc::c_char).to_string(),
+            secret_key: c_str_to_rust_str(replica.cache_sector_path_info.secret_key as *mut libc::c_char).to_string(),
+            bucket_name: c_str_to_rust_str(replica.cache_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
+            sector_name: c_str_to_rust_str(replica.cache_sector_path_info.sector_name as *mut libc::c_char).to_string(),
+        };
+
+        /*
+        let replica_sector_path_info = PrivateSectorPathInfo {
+            url: "http://192.168.50.193:9000".to_string(),
+            landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
+            access_key: "admin".to_string(),
+            secret_key: "admin123456".to_string(),
+            bucket_name: "filecoin-bucket-t01002-data".to_string(),
+            sector_name: "s-t01002-0".to_string(),
+        };
+
+        let cache_sector_path_info = PrivateSectorPathInfo {
+            url: "http://192.168.50.193:9000".to_string(),
+            landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
+            access_key: "admin".to_string(),
+            secret_key: "admin123456".to_string(),
+            bucket_name: "filecoin-bucket-t01002-proof".to_string(),
+            sector_name: "s-t01002-0".to_string(),
+        };
+        */
+
+        let replica_v1 = PrivateReplicaInfo::new_with_oss_config(
+            replica.registered_proof.into(),
+            replica_path,
+            replica.replica_in_oss,
+            replica_sector_path_info,
+            replica.comm_r,
+            cache_dir_path,
+            replica.cache_in_oss,
+            cache_sector_path_info,
         );
 
         let result = filecoin_proofs_api::post::generate_single_vanilla_proof(

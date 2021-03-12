@@ -120,11 +120,24 @@ type publicSectorInfo struct {
 	SectorNum     abi.SectorNumber
 }
 
+type PrivateSectorPathInfo struct {
+	Url        string
+	AccessKey  string
+	SecretKey  string
+	BucketName string
+	LandedDir  string
+	SectorName string
+}
+
 type PrivateSectorInfo struct {
 	proof.SectorInfo
-	CacheDirPath     string
-	PoStProofType    abi.RegisteredPoStProof
-	SealedSectorPath string
+	CacheDirPath         string
+	CacheInOss           bool
+	CacheSectorPathInfo  PrivateSectorPathInfo
+	PoStProofType        abi.RegisteredPoStProof
+	SealedSectorPath     string
+	SealedInOss          bool
+	SealedSectorPathInfo PrivateSectorPathInfo
 }
 
 // AllocationManager is an interface that provides Free() capability.
