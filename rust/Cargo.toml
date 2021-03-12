@@ -31,7 +31,7 @@ rand = "0.7"
 rand_chacha = "0.2.1"
 rayon = "1.2.1"
 anyhow = "1.0.23"
-bellperson = { path = "../../../../bellperson", default-features = false, features = ["cuda"]}
+bellperson = { path = "../../bellperson", default-features = false, features = ["cuda"]}
 serde_json = "1.0.46"
 
 rust-gpu-tools = "0.2.0"
@@ -46,8 +46,8 @@ tokio-serde = { version = "*", features = ["json"] }
 neptune = "=1.1.1"
 neptune-triton = "=1.0.0"
 
-filecoin-proofs-api = { path = "../../../../rust-filecoin-proofs-api", default-features = false }
-filecoin-webapi = { path = "../../../../filecoin-webapi", default-features = false }
+filecoin-proofs-api = { path = "../../rust-filecoin-proofs-api", default-features = false }
+filecoin-webapi = { path = "../../filecoin-webapi", default-features = false }
 
 [build-dependencies]
 cbindgen = "= 0.14.0"
@@ -62,4 +62,4 @@ blst = ["filecoin-proofs-api/blst", "filecoin-webapi/blst", "bellperson/blst"]
 blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
 
 [patch.crates-io]
-merkletree = { path = "../../../../merkletree" }
+merkletree = { path = "../../merkletree" }
