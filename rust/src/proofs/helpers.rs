@@ -88,6 +88,8 @@ pub unsafe fn to_private_replica_info_map(
                 secret_key: c_str_to_rust_str(ffi_info.replica_sector_path_info.secret_key as *mut libc::c_char).to_string(),
                 bucket_name: c_str_to_rust_str(ffi_info.replica_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
                 sector_name: c_str_to_rust_str(ffi_info.replica_sector_path_info.sector_name as *mut libc::c_char).to_string(),
+                region: c_str_to_rust_str(ffi_info.replica_sector_path_info.region as *mut libc::c_char).to_string(),
+                multi_ranges: ffi_info.replica_sector_path_info.multi_ranges,
             };
 
             let cache_sector_path_info = PrivateSectorPathInfo {
@@ -97,6 +99,8 @@ pub unsafe fn to_private_replica_info_map(
                 secret_key: c_str_to_rust_str(ffi_info.cache_sector_path_info.secret_key as *mut libc::c_char).to_string(),
                 bucket_name: c_str_to_rust_str(ffi_info.cache_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
                 sector_name: c_str_to_rust_str(ffi_info.cache_sector_path_info.sector_name as *mut libc::c_char).to_string(),
+                region: c_str_to_rust_str(ffi_info.cache_sector_path_info.region as *mut libc::c_char).to_string(),
+                multi_ranges: ffi_info.cache_sector_path_info.multi_ranges,
             };
 
             PrivateReplicaInfoTmp {

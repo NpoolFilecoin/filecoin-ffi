@@ -256,6 +256,8 @@ pub struct fil_PrivateSectorPathInfo {
     pub bucket_name: *const libc::c_char,
     pub landed_dir: *const libc::c_char,
     pub sector_name: *const libc::c_char,
+    pub region: *const libc::c_char,
+    pub multi_ranges: bool,
 }
 
 #[repr(C)]

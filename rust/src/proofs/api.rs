@@ -711,6 +711,8 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
             secret_key: c_str_to_rust_str(replica.replica_sector_path_info.secret_key as *mut libc::c_char).to_string(),
             bucket_name: c_str_to_rust_str(replica.replica_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
             sector_name: c_str_to_rust_str(replica.replica_sector_path_info.sector_name as *mut libc::c_char).to_string(),
+            region: c_str_to_rust_str(replica.replica_sector_path_info.region as *mut libc::c_char).to_string(),
+            multi_ranges: replica.replica_sector_path_info.multi_ranges,
         };
 
         let cache_sector_path_info = PrivateSectorPathInfo {
@@ -720,6 +722,8 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
             secret_key: c_str_to_rust_str(replica.cache_sector_path_info.secret_key as *mut libc::c_char).to_string(),
             bucket_name: c_str_to_rust_str(replica.cache_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
             sector_name: c_str_to_rust_str(replica.cache_sector_path_info.sector_name as *mut libc::c_char).to_string(),
+            region: c_str_to_rust_str(replica.cache_sector_path_info.region as *mut libc::c_char).to_string(),
+            multi_ranges: replica.cache_sector_path_info.multi_ranges,
         };
 
         /*

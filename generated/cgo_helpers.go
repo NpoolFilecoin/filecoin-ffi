@@ -4,7 +4,7 @@
 package generated
 
 /*
-#cgo LDFLAGS: -L${SRCDIR}/.. -lfilcrypto
+#cgo LDFLAGS: -L${SRCDIR}/..
 #cgo pkg-config: ${SRCDIR}/../filcrypto.pc
 #include "../filcrypto.h"
 #include <stdlib.h>
@@ -3713,6 +3713,14 @@ func (x *FilPrivateSectorPathInfo) PassRef() (*C.fil_PrivateSectorPathInfo, *cgo
 	ref5072832a.sector_name, csector_name_allocs = unpackPCharString(x.SectorName)
 	allocs5072832a.Borrow(csector_name_allocs)
 
+	var cregion_allocs *cgoAllocMap
+	ref5072832a.region, cregion_allocs = unpackPCharString(x.Region)
+	allocs5072832a.Borrow(cregion_allocs)
+
+	var cmulti_ranges_allocs *cgoAllocMap
+	ref5072832a.multi_ranges, cmulti_ranges_allocs = (C._Bool)(x.MultiRanges), cgoAllocsUnknown
+	allocs5072832a.Borrow(cmulti_ranges_allocs)
+
 	x.ref5072832a = ref5072832a
 	x.allocs5072832a = allocs5072832a
 	return ref5072832a, allocs5072832a
@@ -3740,6 +3748,8 @@ func (x *FilPrivateSectorPathInfo) Deref() {
 	x.BucketName = packPCharString(x.ref5072832a.bucket_name)
 	x.LandedDir = packPCharString(x.ref5072832a.landed_dir)
 	x.SectorName = packPCharString(x.ref5072832a.sector_name)
+	x.Region = packPCharString(x.ref5072832a.region)
+	x.MultiRanges = (bool)(x.ref5072832a.multi_ranges)
 }
 
 // allocFilPrivateReplicaInfoMemory allocates memory for type C.fil_PrivateReplicaInfo in C.

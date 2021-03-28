@@ -4,7 +4,7 @@
 package generated
 
 /*
-#cgo LDFLAGS: -L${SRCDIR}/.. -lfilcrypto
+#cgo LDFLAGS: -L${SRCDIR}/..
 #cgo pkg-config: ${SRCDIR}/../filcrypto.pc
 #include "../filcrypto.h"
 #include <stdlib.h>
@@ -337,7 +337,7 @@ type Fil32ByteArray struct {
 	allocs373ec61a interface{}
 }
 
-// FilPrivateSectorPathInfo as declared in filecoin-ffi/filcrypto.h:305
+// FilPrivateSectorPathInfo as declared in filecoin-ffi/filcrypto.h:307
 type FilPrivateSectorPathInfo struct {
 	Url            string
 	AccessKey      string
@@ -345,11 +345,13 @@ type FilPrivateSectorPathInfo struct {
 	BucketName     string
 	LandedDir      string
 	SectorName     string
+	Region         string
+	MultiRanges    bool
 	ref5072832a    *C.fil_PrivateSectorPathInfo
 	allocs5072832a interface{}
 }
 
-// FilPrivateReplicaInfo as declared in filecoin-ffi/filcrypto.h:317
+// FilPrivateReplicaInfo as declared in filecoin-ffi/filcrypto.h:319
 type FilPrivateReplicaInfo struct {
 	RegisteredProof       FilRegisteredPoStProof
 	CacheDirPath          string
@@ -364,7 +366,7 @@ type FilPrivateReplicaInfo struct {
 	allocs81a31e9b        interface{}
 }
 
-// FilPublicReplicaInfo as declared in filecoin-ffi/filcrypto.h:323
+// FilPublicReplicaInfo as declared in filecoin-ffi/filcrypto.h:325
 type FilPublicReplicaInfo struct {
 	RegisteredProof FilRegisteredPoStProof
 	CommR           [32]byte
