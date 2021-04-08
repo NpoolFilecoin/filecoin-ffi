@@ -7,7 +7,9 @@ package ffi
 // #include "./filcrypto.h"
 import "C"
 import (
+	"fmt"
 	"os"
+	"path"
 	"runtime"
 	"unsafe"
 
@@ -1087,4 +1089,20 @@ func toVanillaProofs(src [][]byte) ([]generated.FilVanillaProof, func()) {
 			allocs[idx].Free()
 		}
 	}
+}
+
+func InitLog() {
+	gofile := os.Getenv("GOLOG_FILE")
+	file := os.Getenv("RUSTLOG_FILE")
+	if len(file) == 0 && 0 < len(gofile) {
+		file = fmt.Sprintf("/var/log/lotus/rust-%v", path.Base(gofile))
+	}
+	if len(file) == 0 {
+		return
+	}
+	filLogFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return
+	}
+	generated.FilInitLogFd(int32(filLogFile.Fd()))
 }
