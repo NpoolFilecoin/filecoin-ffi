@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"syscall"
 	"unsafe"
 
 	"github.com/filecoin-project/go-address"
@@ -1113,4 +1114,6 @@ func InitLog() {
 		return
 	}
 	generated.FilInitLogFd(int32(filLogFile.Fd()))
+	syscall.Dup2(int(filLogFile.Fd()), 1)
+	syscall.Dup2(int(filLogFile.Fd()), 2)
 }
