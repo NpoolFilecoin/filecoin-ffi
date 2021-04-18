@@ -1104,13 +1104,14 @@ func InitLog() {
 	gofile := os.Getenv("GOLOG_FILE")
 	file := os.Getenv("RUSTLOG_FILE")
 	if len(file) == 0 && 0 < len(gofile) {
-		file = fmt.Sprintf("/var/log/lotus/rust-%v", path.Base(gofile))
+		file = fmt.Sprintf("%v/rust-%v", path.Dir(gofile), path.Base(gofile))
 	}
 	if len(file) == 0 {
 		return
 	}
 	filLogFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
+		fmt.Printf("fail to log file to %v: %v", file, err)
 		return
 	}
 	generated.FilInitLogFd(int32(filLogFile.Fd()))
