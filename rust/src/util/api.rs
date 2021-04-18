@@ -12,9 +12,9 @@ static LOG_INIT: Once = Once::new();
 
 /// Ensures the logger is initialized.
 pub fn init_log() {
-    // LOG_INIT.call_once(|| {
-    //     fil_logger::init();
-    // });
+    LOG_INIT.call_once(|| {
+        fil_logger::init();
+    });
 }
 /// Initialize the logger with a file to log into
 ///

@@ -1103,17 +1103,19 @@ func toVanillaProofs(src [][]byte) ([]generated.FilVanillaProof, func()) {
 func InitLog() {
 	gofile := os.Getenv("GOLOG_FILE")
 	file := os.Getenv("RUSTLOG_FILE")
-	if len(file) == 0 && 0 < len(gofile) {
-		file = fmt.Sprintf("%v/rust-%v", path.Dir(gofile), path.Base(gofile))
-	}
 	if len(file) == 0 {
-		return
+		if 0 < len(gofile) {
+			file = fmt.Sprintf("%v/rust-%v", path.Dir(gofile), path.Base(gofile))
+		} else {
+			file = "/var/log/lotus/rust-log.log"
+		}
 	}
 	filLogFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		fmt.Printf("fail to log file to %v: %v", file, err)
+		fmt.Printf("fail to ffi log file to %v: %v\n", file, err)
 		return
 	}
+	fmt.Printf("initialize ffi log file to %v\n", file)
 	generated.FilInitLogFd(int32(filLogFile.Fd()))
 	syscall.Dup2(int(filLogFile.Fd()), 1)
 	syscall.Dup2(int(filLogFile.Fd()), 2)
