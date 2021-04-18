@@ -11,7 +11,7 @@ import (
 	"os"
 	"path"
 	"runtime"
-	"syscall"
+	_ "syscall"
 	"unsafe"
 
 	"github.com/filecoin-project/go-address"
@@ -1110,13 +1110,16 @@ func InitLog() {
 			file = "/var/log/lotus/rust-log.log"
 		}
 	}
-	filLogFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		fmt.Printf("fail to ffi log file to %v: %v\n", file, err)
+	if len(file) == 0 {
+		fmt.Printf("FFI log filename is not given\n")
 		return
 	}
-	fmt.Printf("initialize ffi log file to %v\n", file)
+	filLogFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Printf("CANNOT open FFI log file %v: %v\n", file, err)
+		return
+	}
 	generated.FilInitLogFd(int32(filLogFile.Fd()))
-	syscall.Dup2(int(filLogFile.Fd()), 1)
-	syscall.Dup2(int(filLogFile.Fd()), 2)
+	// syscall.Dup2(int(filLogFile.Fd()), 1)
+	// syscall.Dup2(int(filLogFile.Fd()), 2)
 }
