@@ -121,7 +121,7 @@ func WorkflowProofsLifecycle(t TestHelper) {
 	t.RequireNoError(err)
 
 	// pre-commit the sector
-	sealPreCommitPhase1Output, err := SealPreCommitPhase1(sealProofType, sectorCacheDirPath, stagedSectorFile.Name(), sealedSectorFile.Name(), sectorNum, minerID, ticket, publicPieces)
+	sealPreCommitPhase1Output, err := SealPreCommitPhase1(sealProofType, sectorCacheDirPath, stagedSectorFile.Name(), sealedSectorFile.Name(), sectorNum, minerID, ticket, publicPieces, false)
 	t.RequireNoError(err)
 
 	sealedCID, unsealedCID, err := SealPreCommitPhase2(sealPreCommitPhase1Output, sectorCacheDirPath, sealedSectorFile.Name())

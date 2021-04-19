@@ -281,6 +281,7 @@ func SealPreCommitPhase1(
 	minerID abi.ActorID,
 	ticket abi.SealRandomness,
 	pieces []abi.PieceInfo,
+	hasDeals bool,
 ) (phase1Output []byte, err error) {
 	sp, err := toFilRegisteredSealProof(proofType)
 	if err != nil {
@@ -297,7 +298,7 @@ func SealPreCommitPhase1(
 		return nil, err
 	}
 
-	resp := generated.FilSealPreCommitPhase1(sp, cacheDirPath, stagedSectorPath, sealedSectorPath, uint64(sectorNum), proverID, to32ByteArray(ticket), filPublicPieceInfos, filPublicPieceInfosLen)
+	resp := generated.FilSealPreCommitPhase1(sp, cacheDirPath, stagedSectorPath, sealedSectorPath, uint64(sectorNum), proverID, to32ByteArray(ticket), filPublicPieceInfos, filPublicPieceInfosLen, hasDeals)
 	resp.Deref()
 
 	defer generated.FilDestroySealPreCommitPhase1Response(resp)
