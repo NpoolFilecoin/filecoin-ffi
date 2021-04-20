@@ -199,7 +199,7 @@ pub unsafe extern "C" fn fil_seal_pre_commit_phase1(
     ticket: fil_32ByteArray,
     pieces_ptr: *const fil_PublicPieceInfo,
     pieces_len: libc::size_t,
-	has_deals: bool,
+    has_deals: bool,
 ) -> *mut fil_SealPreCommitPhase1Response {
     catch_panic_response(|| {
         init_log();
@@ -223,7 +223,7 @@ pub unsafe extern "C" fn fil_seal_pre_commit_phase1(
             SectorId::from(sector_id),
             ticket.inner,
             &public_pieces,
-			has_deals,
+            has_deals,
         )
         .and_then(|output| serde_json::to_vec(&output).map_err(Into::into));
 
@@ -1887,7 +1887,7 @@ pub mod tests {
                 ticket,
                 pieces.as_ptr(),
                 pieces.len(),
-				false,
+                false,
             );
 
             if (*resp_b1).status_code != FCPResponseStatus::FCPNoError {
@@ -2487,7 +2487,7 @@ pub mod tests {
                 ticket,
                 pieces.as_ptr(),
                 pieces.len(),
-				false,
+                false,
             );
 
             if (*resp_b1).status_code != FCPResponseStatus::FCPNoError {
