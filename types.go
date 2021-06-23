@@ -121,7 +121,7 @@ type publicSectorInfo struct {
 }
 
 type PrivateSectorPathInfo struct {
-	Url         string
+	Endpoints   string
 	AccessKey   string
 	SecretKey   string
 	BucketName  string

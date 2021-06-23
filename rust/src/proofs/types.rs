@@ -250,7 +250,7 @@ impl From<fil_PoStProof> for PoStProof {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct fil_PrivateSectorPathInfo {
-    pub url: *const libc::c_char,
+    pub endpoints: *const libc::c_char,// split by comma(,)
     pub access_key: *const libc::c_char,
     pub secret_key: *const libc::c_char,
     pub bucket_name: *const libc::c_char,

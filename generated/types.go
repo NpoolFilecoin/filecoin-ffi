@@ -339,7 +339,7 @@ type Fil32ByteArray struct {
 
 // FilPrivateSectorPathInfo as declared in filecoin-ffi/filcrypto.h:307
 type FilPrivateSectorPathInfo struct {
-	Url            string
+	Endpoints      string
 	AccessKey      string
 	SecretKey      string
 	BucketName     string

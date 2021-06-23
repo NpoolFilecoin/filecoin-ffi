@@ -790,7 +790,7 @@ func toFilPrivateReplicaInfo(src PrivateSectorInfo) (generated.FilPrivateReplica
 		CacheDirPath:    src.CacheDirPath,
 		CacheInOss:      src.CacheInOss,
 		CacheSectorPathInfo: generated.FilPrivateSectorPathInfo{
-			Url:         src.CacheSectorPathInfo.Url,
+			Endpoints:   src.CacheSectorPathInfo.Endpoints,
 			LandedDir:   src.CacheSectorPathInfo.LandedDir,
 			AccessKey:   src.CacheSectorPathInfo.AccessKey,
 			SecretKey:   src.CacheSectorPathInfo.SecretKey,
@@ -803,7 +803,7 @@ func toFilPrivateReplicaInfo(src PrivateSectorInfo) (generated.FilPrivateReplica
 		ReplicaPath:  src.SealedSectorPath,
 		ReplicaInOss: src.SealedInOss,
 		ReplicaSectorPathInfo: generated.FilPrivateSectorPathInfo{
-			Url:         src.SealedSectorPathInfo.Url,
+			Endpoints:   src.SealedSectorPathInfo.Endpoints,
 			LandedDir:   src.SealedSectorPathInfo.LandedDir,
 			AccessKey:   src.SealedSectorPathInfo.AccessKey,
 			SecretKey:   src.SealedSectorPathInfo.SecretKey,
@@ -839,7 +839,7 @@ func toFilPrivateReplicaInfos(src []PrivateSectorInfo, typ string) ([]generated.
 			CacheDirPath:    src[idx].CacheDirPath,
 			CacheInOss:      src[idx].CacheInOss,
 			CacheSectorPathInfo: generated.FilPrivateSectorPathInfo{
-				Url:         src[idx].CacheSectorPathInfo.Url,
+				Endpoints:   src[idx].CacheSectorPathInfo.Endpoints,
 				LandedDir:   src[idx].CacheSectorPathInfo.LandedDir,
 				AccessKey:   src[idx].CacheSectorPathInfo.AccessKey,
 				SecretKey:   src[idx].CacheSectorPathInfo.SecretKey,
@@ -852,7 +852,7 @@ func toFilPrivateReplicaInfos(src []PrivateSectorInfo, typ string) ([]generated.
 			ReplicaPath:  src[idx].SealedSectorPath,
 			ReplicaInOss: src[idx].SealedInOss,
 			ReplicaSectorPathInfo: generated.FilPrivateSectorPathInfo{
-				Url:         src[idx].SealedSectorPathInfo.Url,
+				Endpoints:   src[idx].SealedSectorPathInfo.Endpoints,
 				LandedDir:   src[idx].SealedSectorPathInfo.LandedDir,
 				AccessKey:   src[idx].SealedSectorPathInfo.AccessKey,
 				SecretKey:   src[idx].SealedSectorPathInfo.SecretKey,
