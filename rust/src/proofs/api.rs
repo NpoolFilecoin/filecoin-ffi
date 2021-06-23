@@ -1,5 +1,5 @@
 use ffi_toolkit::{
-    c_str_to_pbuf, catch_panic_response, raw_ptr, rust_str_to_c_str, FCPResponseStatus,
+    c_str_to_pbuf, catch_panic_response, raw_ptr, rust_str_to_c_str, FCPResponseStatus, c_str_to_rust_str,
 };
 use filecoin_proofs_api::seal::{
     add_piece, aggregate_seal_commit_proofs, clear_cache, compute_comm_d, fauxrep, fauxrep2,
@@ -16,7 +16,9 @@ use bellperson::bls::Fr;
 use log::{error, info};
 use rayon::prelude::*;
 
+use filecoin_webapi::*;
 use std::mem;
+use std::env;
 use std::path::PathBuf;
 use std::slice::from_raw_parts;
 
@@ -26,6 +28,7 @@ use crate::util::api::init_log;
 
 // A byte serialized representation of a vanilla proof.
 pub type VanillaProof = Vec<u8>;
+use serde_json::json;
 
 /// TODO: document
 ///
@@ -206,6 +209,7 @@ pub unsafe extern "C" fn fil_seal_pre_commit_phase1(
     ticket: fil_32ByteArray,
     pieces_ptr: *const fil_PublicPieceInfo,
     pieces_len: libc::size_t,
+    has_deals: bool,
 ) -> *mut fil_SealPreCommitPhase1Response {
     catch_panic_response(|| {
         init_log();
@@ -227,6 +231,7 @@ pub unsafe extern "C" fn fil_seal_pre_commit_phase1(
             SectorId::from(sector_id),
             ticket.inner,
             &public_pieces,
+            has_deals,
         )
         .and_then(|output| serde_json::to_vec(&output).map_err(Into::into));
 
@@ -381,19 +386,44 @@ pub unsafe extern "C" fn fil_seal_commit_phase2(
         ))
         .map_err(Into::into);
 
-        let result =
-            scp1o.and_then(|o| seal_commit_phase2(o, prover_id.inner, SectorId::from(sector_id)));
+        if env::var("FFI_REMOTE_COMMIT2").is_ok() {
+            let web_data = seal_data::SealCommitPhase2Data {
+                phase1_output: scp1o.unwrap(),
+                prover_id: prover_id.inner,
+                sector_id: SectorId::from(sector_id),
+            };
+            let json_data = json!(web_data);
+            let r = webapi_post_polling!("seal/seal_commit_phase2", &json_data);
+            info!("response: {:?}", r);
 
-        match result {
-            Ok(output) => {
-                response.status_code = FCPResponseStatus::FCPNoError;
-                response.proof_ptr = output.proof.as_ptr();
-                response.proof_len = output.proof.len();
-                mem::forget(output.proof);
-            }
-            Err(err) => {
+            if let Err(e) = r {
                 response.status_code = FCPResponseStatus::FCPUnclassifiedError;
-                response.error_msg = rust_str_to_c_str(format!("{:?}", err));
+                response.error_msg = rust_str_to_c_str(format!("{:?}", e));
+                return raw_ptr(response);
+            }
+
+            let r = r.unwrap();
+            let output: SealCommitPhase2Output = serde_json::from_value(r.get("Ok").unwrap().clone()).unwrap();
+            response.status_code = FCPResponseStatus::FCPNoError;
+            response.proof_ptr = output.proof.as_ptr();
+            response.proof_len = output.proof.len();
+            mem::forget(output.proof);
+        } else {
+            let result = scp1o.and_then(|o| {
+                filecoin_proofs_api::seal::seal_commit_phase2(o, prover_id.inner, SectorId::from(sector_id))
+            });
+
+            match result {
+                Ok(output) => {
+                    response.status_code = FCPResponseStatus::FCPNoError;
+                    response.proof_ptr = output.proof.as_ptr();
+                    response.proof_len = output.proof.len();
+                    mem::forget(output.proof);
+                }
+                Err(err) => {
+                    response.status_code = FCPResponseStatus::FCPUnclassifiedError;
+                    response.error_msg = rust_str_to_c_str(format!("{:?}", err));
+                }
             }
         }
 
@@ -824,11 +854,66 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
         let cache_dir_path = c_str_to_pbuf(replica.cache_dir_path);
         let replica_path = c_str_to_pbuf(replica.replica_path);
 
+        /*
         let replica_v1 = PrivateReplicaInfo::new(
             replica.registered_proof.into(),
             replica.comm_r,
             cache_dir_path,
             replica_path,
+        );
+        */
+
+        let replica_sector_path_info = PrivateSectorPathInfo {
+            url: c_str_to_rust_str(replica.replica_sector_path_info.url as *mut libc::c_char).to_string(),
+            landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
+            access_key: c_str_to_rust_str(replica.replica_sector_path_info.access_key as *mut libc::c_char).to_string(),
+            secret_key: c_str_to_rust_str(replica.replica_sector_path_info.secret_key as *mut libc::c_char).to_string(),
+            bucket_name: c_str_to_rust_str(replica.replica_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
+            sector_name: c_str_to_rust_str(replica.replica_sector_path_info.sector_name as *mut libc::c_char).to_string(),
+            region: c_str_to_rust_str(replica.replica_sector_path_info.region as *mut libc::c_char).to_string(),
+            multi_ranges: replica.replica_sector_path_info.multi_ranges,
+        };
+
+        let cache_sector_path_info = PrivateSectorPathInfo {
+            url: c_str_to_rust_str(replica.cache_sector_path_info.url as *mut libc::c_char).to_string(),
+            landed_dir: c_str_to_pbuf(replica.cache_sector_path_info.landed_dir),
+            access_key: c_str_to_rust_str(replica.cache_sector_path_info.access_key as *mut libc::c_char).to_string(),
+            secret_key: c_str_to_rust_str(replica.cache_sector_path_info.secret_key as *mut libc::c_char).to_string(),
+            bucket_name: c_str_to_rust_str(replica.cache_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
+            sector_name: c_str_to_rust_str(replica.cache_sector_path_info.sector_name as *mut libc::c_char).to_string(),
+            region: c_str_to_rust_str(replica.cache_sector_path_info.region as *mut libc::c_char).to_string(),
+            multi_ranges: replica.cache_sector_path_info.multi_ranges,
+        };
+
+        /*
+        let replica_sector_path_info = PrivateSectorPathInfo {
+            url: "http://192.168.50.193:9000".to_string(),
+            landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
+            access_key: "admin".to_string(),
+            secret_key: "admin123456".to_string(),
+            bucket_name: "filecoin-bucket-t01002-data".to_string(),
+            sector_name: "s-t01002-0".to_string(),
+        };
+
+        let cache_sector_path_info = PrivateSectorPathInfo {
+            url: "http://192.168.50.193:9000".to_string(),
+            landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
+            access_key: "admin".to_string(),
+            secret_key: "admin123456".to_string(),
+            bucket_name: "filecoin-bucket-t01002-proof".to_string(),
+            sector_name: "s-t01002-0".to_string(),
+        };
+        */
+
+        let replica_v1 = PrivateReplicaInfo::new_with_oss_config(
+            replica.registered_proof.into(),
+            replica_path,
+            replica.replica_in_oss,
+            replica_sector_path_info,
+            replica.comm_r,
+            cache_dir_path,
+            replica.cache_in_oss,
+            cache_sector_path_info,
         );
 
         let result = filecoin_proofs_api::post::generate_single_vanilla_proof(
@@ -1976,6 +2061,7 @@ pub mod tests {
                 ticket,
                 pieces.as_ptr(),
                 pieces.len(),
+                false,
             );
 
             if (*resp_b1).status_code != FCPResponseStatus::FCPNoError {
@@ -2621,6 +2707,7 @@ pub mod tests {
                 ticket,
                 pieces.as_ptr(),
                 pieces.len(),
+                false,
             );
 
             if (*resp_b1).status_code != FCPResponseStatus::FCPNoError {

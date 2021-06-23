@@ -724,7 +724,7 @@ func FilSealCommitPhase2(sealCommitPhase1OutputPtr []byte, sealCommitPhase1Outpu
 }
 
 // FilSealPreCommitPhase1 function as declared in filecoin-ffi/filcrypto.h:738
-func FilSealPreCommitPhase1(registeredProof FilRegisteredSealProof, cacheDirPath string, stagedSectorPath string, sealedSectorPath string, sectorId uint64, proverId Fil32ByteArray, ticket Fil32ByteArray, piecesPtr []FilPublicPieceInfo, piecesLen uint) *FilSealPreCommitPhase1Response {
+func FilSealPreCommitPhase1(registeredProof FilRegisteredSealProof, cacheDirPath string, stagedSectorPath string, sealedSectorPath string, sectorId uint64, proverId Fil32ByteArray, ticket Fil32ByteArray, piecesPtr []FilPublicPieceInfo, piecesLen uint, hasDeals bool) *FilSealPreCommitPhase1Response {
 	cregisteredProof, cregisteredProofAllocMap := (C.fil_RegisteredSealProof)(registeredProof), cgoAllocsUnknown
 	cacheDirPath = safeString(cacheDirPath)
 	ccacheDirPath, ccacheDirPathAllocMap := unpackPCharString(cacheDirPath)
@@ -737,7 +737,9 @@ func FilSealPreCommitPhase1(registeredProof FilRegisteredSealProof, cacheDirPath
 	cticket, cticketAllocMap := ticket.PassValue()
 	cpiecesPtr, cpiecesPtrAllocMap := unpackArgSFilPublicPieceInfo(piecesPtr)
 	cpiecesLen, cpiecesLenAllocMap := (C.size_t)(piecesLen), cgoAllocsUnknown
-	__ret := C.fil_seal_pre_commit_phase1(cregisteredProof, ccacheDirPath, cstagedSectorPath, csealedSectorPath, csectorId, cproverId, cticket, cpiecesPtr, cpiecesLen)
+	chasDeals, chasDealsAllocMap := (C._Bool)(hasDeals), cgoAllocsUnknown
+	__ret := C.fil_seal_pre_commit_phase1(cregisteredProof, ccacheDirPath, cstagedSectorPath, csealedSectorPath, csectorId, cproverId, cticket, cpiecesPtr, cpiecesLen, chasDeals)
+	runtime.KeepAlive(chasDealsAllocMap)
 	runtime.KeepAlive(cpiecesLenAllocMap)
 	packSFilPublicPieceInfo(piecesPtr, cpiecesPtr)
 	runtime.KeepAlive(cpiecesPtrAllocMap)

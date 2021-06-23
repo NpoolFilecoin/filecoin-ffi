@@ -3976,6 +3976,203 @@ func (x *FilPublicPieceInfo) Deref() {
 	x.CommP = *(*[32]byte)(unsafe.Pointer(&x.refd00025ac.comm_p))
 }
 
+// allocFil32ByteArrayMemory allocates memory for type C.fil_32ByteArray in C.
+// The caller is responsible for freeing the this memory via C.free.
+func allocFil32ByteArrayMemory(n int) unsafe.Pointer {
+	mem, err := C.calloc(C.size_t(n), (C.size_t)(sizeOfFil32ByteArrayValue))
+	if mem == nil {
+		panic(fmt.Sprintln("memory alloc error: ", err))
+	}
+	return mem
+}
+
+const sizeOfFil32ByteArrayValue = unsafe.Sizeof([1]C.fil_32ByteArray{})
+
+// Ref returns the underlying reference to C object or nil if struct is nil.
+func (x *Fil32ByteArray) Ref() *C.fil_32ByteArray {
+	if x == nil {
+		return nil
+	}
+	return x.ref373ec61a
+}
+
+// Free invokes alloc map's free mechanism that cleanups any allocated memory using C free.
+// Does nothing if struct is nil or has no allocation map.
+func (x *Fil32ByteArray) Free() {
+	if x != nil && x.allocs373ec61a != nil {
+		x.allocs373ec61a.(*cgoAllocMap).Free()
+		x.ref373ec61a = nil
+	}
+}
+
+// NewFil32ByteArrayRef creates a new wrapper struct with underlying reference set to the original C object.
+// Returns nil if the provided pointer to C object is nil too.
+func NewFil32ByteArrayRef(ref unsafe.Pointer) *Fil32ByteArray {
+	if ref == nil {
+		return nil
+	}
+	obj := new(Fil32ByteArray)
+	obj.ref373ec61a = (*C.fil_32ByteArray)(unsafe.Pointer(ref))
+	return obj
+}
+
+// PassRef returns the underlying C object, otherwise it will allocate one and set its values
+// from this wrapping struct, counting allocations into an allocation map.
+func (x *Fil32ByteArray) PassRef() (*C.fil_32ByteArray, *cgoAllocMap) {
+	if x == nil {
+		return nil, nil
+	} else if x.ref373ec61a != nil {
+		return x.ref373ec61a, nil
+	}
+	mem373ec61a := allocFil32ByteArrayMemory(1)
+	ref373ec61a := (*C.fil_32ByteArray)(mem373ec61a)
+	allocs373ec61a := new(cgoAllocMap)
+	allocs373ec61a.Add(mem373ec61a)
+
+	var cinner_allocs *cgoAllocMap
+	ref373ec61a.inner, cinner_allocs = *(*[32]C.uint8_t)(unsafe.Pointer(&x.Inner)), cgoAllocsUnknown
+	allocs373ec61a.Borrow(cinner_allocs)
+
+	x.ref373ec61a = ref373ec61a
+	x.allocs373ec61a = allocs373ec61a
+	return ref373ec61a, allocs373ec61a
+
+}
+
+// PassValue does the same as PassRef except that it will try to dereference the returned pointer.
+func (x Fil32ByteArray) PassValue() (C.fil_32ByteArray, *cgoAllocMap) {
+	if x.ref373ec61a != nil {
+		return *x.ref373ec61a, nil
+	}
+	ref, allocs := x.PassRef()
+	return *ref, allocs
+}
+
+// Deref uses the underlying reference to C object and fills the wrapping struct with values.
+// Do not forget to call this method whether you get a struct for C object and want to read its values.
+func (x *Fil32ByteArray) Deref() {
+	if x.ref373ec61a == nil {
+		return
+	}
+	x.Inner = *(*[32]byte)(unsafe.Pointer(&x.ref373ec61a.inner))
+}
+
+// allocFilPrivateSectorPathInfoMemory allocates memory for type C.fil_PrivateSectorPathInfo in C.
+// The caller is responsible for freeing the this memory via C.free.
+func allocFilPrivateSectorPathInfoMemory(n int) unsafe.Pointer {
+	mem, err := C.calloc(C.size_t(n), (C.size_t)(sizeOfFilPrivateSectorPathInfoValue))
+	if mem == nil {
+		panic(fmt.Sprintln("memory alloc error: ", err))
+	}
+	return mem
+}
+
+const sizeOfFilPrivateSectorPathInfoValue = unsafe.Sizeof([1]C.fil_PrivateSectorPathInfo{})
+
+// Ref returns the underlying reference to C object or nil if struct is nil.
+func (x *FilPrivateSectorPathInfo) Ref() *C.fil_PrivateSectorPathInfo {
+	if x == nil {
+		return nil
+	}
+	return x.ref5072832a
+}
+
+// Free invokes alloc map's free mechanism that cleanups any allocated memory using C free.
+// Does nothing if struct is nil or has no allocation map.
+func (x *FilPrivateSectorPathInfo) Free() {
+	if x != nil && x.allocs5072832a != nil {
+		x.allocs5072832a.(*cgoAllocMap).Free()
+		x.ref5072832a = nil
+	}
+}
+
+// NewFilPrivateSectorPathInfoRef creates a new wrapper struct with underlying reference set to the original C object.
+// Returns nil if the provided pointer to C object is nil too.
+func NewFilPrivateSectorPathInfoRef(ref unsafe.Pointer) *FilPrivateSectorPathInfo {
+	if ref == nil {
+		return nil
+	}
+	obj := new(FilPrivateSectorPathInfo)
+	obj.ref5072832a = (*C.fil_PrivateSectorPathInfo)(unsafe.Pointer(ref))
+	return obj
+}
+
+// PassRef returns the underlying C object, otherwise it will allocate one and set its values
+// from this wrapping struct, counting allocations into an allocation map.
+func (x *FilPrivateSectorPathInfo) PassRef() (*C.fil_PrivateSectorPathInfo, *cgoAllocMap) {
+	if x == nil {
+		return nil, nil
+	} else if x.ref5072832a != nil {
+		return x.ref5072832a, nil
+	}
+	mem5072832a := allocFilPrivateSectorPathInfoMemory(1)
+	ref5072832a := (*C.fil_PrivateSectorPathInfo)(mem5072832a)
+	allocs5072832a := new(cgoAllocMap)
+	allocs5072832a.Add(mem5072832a)
+
+	var curl_allocs *cgoAllocMap
+	ref5072832a.url, curl_allocs = unpackPCharString(x.Url)
+	allocs5072832a.Borrow(curl_allocs)
+
+	var caccess_key_allocs *cgoAllocMap
+	ref5072832a.access_key, caccess_key_allocs = unpackPCharString(x.AccessKey)
+	allocs5072832a.Borrow(caccess_key_allocs)
+
+	var csecret_key_allocs *cgoAllocMap
+	ref5072832a.secret_key, csecret_key_allocs = unpackPCharString(x.SecretKey)
+	allocs5072832a.Borrow(csecret_key_allocs)
+
+	var cbucket_name_allocs *cgoAllocMap
+	ref5072832a.bucket_name, cbucket_name_allocs = unpackPCharString(x.BucketName)
+	allocs5072832a.Borrow(cbucket_name_allocs)
+
+	var clanded_dir_allocs *cgoAllocMap
+	ref5072832a.landed_dir, clanded_dir_allocs = unpackPCharString(x.LandedDir)
+	allocs5072832a.Borrow(clanded_dir_allocs)
+
+	var csector_name_allocs *cgoAllocMap
+	ref5072832a.sector_name, csector_name_allocs = unpackPCharString(x.SectorName)
+	allocs5072832a.Borrow(csector_name_allocs)
+
+	var cregion_allocs *cgoAllocMap
+	ref5072832a.region, cregion_allocs = unpackPCharString(x.Region)
+	allocs5072832a.Borrow(cregion_allocs)
+
+	var cmulti_ranges_allocs *cgoAllocMap
+	ref5072832a.multi_ranges, cmulti_ranges_allocs = (C._Bool)(x.MultiRanges), cgoAllocsUnknown
+	allocs5072832a.Borrow(cmulti_ranges_allocs)
+
+	x.ref5072832a = ref5072832a
+	x.allocs5072832a = allocs5072832a
+	return ref5072832a, allocs5072832a
+
+}
+
+// PassValue does the same as PassRef except that it will try to dereference the returned pointer.
+func (x FilPrivateSectorPathInfo) PassValue() (C.fil_PrivateSectorPathInfo, *cgoAllocMap) {
+	if x.ref5072832a != nil {
+		return *x.ref5072832a, nil
+	}
+	ref, allocs := x.PassRef()
+	return *ref, allocs
+}
+
+// Deref uses the underlying reference to C object and fills the wrapping struct with values.
+// Do not forget to call this method whether you get a struct for C object and want to read its values.
+func (x *FilPrivateSectorPathInfo) Deref() {
+	if x.ref5072832a == nil {
+		return
+	}
+	x.Url = packPCharString(x.ref5072832a.url)
+	x.AccessKey = packPCharString(x.ref5072832a.access_key)
+	x.SecretKey = packPCharString(x.ref5072832a.secret_key)
+	x.BucketName = packPCharString(x.ref5072832a.bucket_name)
+	x.LandedDir = packPCharString(x.ref5072832a.landed_dir)
+	x.SectorName = packPCharString(x.ref5072832a.sector_name)
+	x.Region = packPCharString(x.ref5072832a.region)
+	x.MultiRanges = (bool)(x.ref5072832a.multi_ranges)
+}
+
 // allocFilPrivateReplicaInfoMemory allocates memory for type C.fil_PrivateReplicaInfo in C.
 // The caller is responsible for freeing the this memory via C.free.
 func allocFilPrivateReplicaInfoMemory(n int) unsafe.Pointer {
@@ -4037,6 +4234,14 @@ func (x *FilPrivateReplicaInfo) PassRef() (*C.fil_PrivateReplicaInfo, *cgoAllocM
 	ref81a31e9b.cache_dir_path, ccache_dir_path_allocs = unpackPCharString(x.CacheDirPath)
 	allocs81a31e9b.Borrow(ccache_dir_path_allocs)
 
+	var ccache_in_oss_allocs *cgoAllocMap
+	ref81a31e9b.cache_in_oss, ccache_in_oss_allocs = (C._Bool)(x.CacheInOss), cgoAllocsUnknown
+	allocs81a31e9b.Borrow(ccache_in_oss_allocs)
+
+	var ccache_sector_path_info_allocs *cgoAllocMap
+	ref81a31e9b.cache_sector_path_info, ccache_sector_path_info_allocs = x.CacheSectorPathInfo.PassValue()
+	allocs81a31e9b.Borrow(ccache_sector_path_info_allocs)
+
 	var ccomm_r_allocs *cgoAllocMap
 	ref81a31e9b.comm_r, ccomm_r_allocs = *(*[32]C.uint8_t)(unsafe.Pointer(&x.CommR)), cgoAllocsUnknown
 	allocs81a31e9b.Borrow(ccomm_r_allocs)
@@ -4044,6 +4249,14 @@ func (x *FilPrivateReplicaInfo) PassRef() (*C.fil_PrivateReplicaInfo, *cgoAllocM
 	var creplica_path_allocs *cgoAllocMap
 	ref81a31e9b.replica_path, creplica_path_allocs = unpackPCharString(x.ReplicaPath)
 	allocs81a31e9b.Borrow(creplica_path_allocs)
+
+	var creplica_in_oss_allocs *cgoAllocMap
+	ref81a31e9b.replica_in_oss, creplica_in_oss_allocs = (C._Bool)(x.ReplicaInOss), cgoAllocsUnknown
+	allocs81a31e9b.Borrow(creplica_in_oss_allocs)
+
+	var creplica_sector_path_info_allocs *cgoAllocMap
+	ref81a31e9b.replica_sector_path_info, creplica_sector_path_info_allocs = x.ReplicaSectorPathInfo.PassValue()
+	allocs81a31e9b.Borrow(creplica_sector_path_info_allocs)
 
 	var csector_id_allocs *cgoAllocMap
 	ref81a31e9b.sector_id, csector_id_allocs = (C.uint64_t)(x.SectorId), cgoAllocsUnknown
@@ -4072,8 +4285,12 @@ func (x *FilPrivateReplicaInfo) Deref() {
 	}
 	x.RegisteredProof = (FilRegisteredPoStProof)(x.ref81a31e9b.registered_proof)
 	x.CacheDirPath = packPCharString(x.ref81a31e9b.cache_dir_path)
+	x.CacheInOss = (bool)(x.ref81a31e9b.cache_in_oss)
+	x.CacheSectorPathInfo = *NewFilPrivateSectorPathInfoRef(unsafe.Pointer(&x.ref81a31e9b.cache_sector_path_info))
 	x.CommR = *(*[32]byte)(unsafe.Pointer(&x.ref81a31e9b.comm_r))
 	x.ReplicaPath = packPCharString(x.ref81a31e9b.replica_path)
+	x.ReplicaInOss = (bool)(x.ref81a31e9b.replica_in_oss)
+	x.ReplicaSectorPathInfo = *NewFilPrivateSectorPathInfoRef(unsafe.Pointer(&x.ref81a31e9b.replica_sector_path_info))
 	x.SectorId = (uint64)(x.ref81a31e9b.sector_id)
 }
 

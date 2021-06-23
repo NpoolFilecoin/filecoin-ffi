@@ -7,8 +7,11 @@ package ffi
 // #include "./filcrypto.h"
 import "C"
 import (
+	"fmt"
 	"os"
+	"path"
 	"runtime"
+	_ "syscall"
 	"unsafe"
 
 	"github.com/filecoin-project/go-address"
@@ -333,6 +336,7 @@ func SealPreCommitPhase1(
 	minerID abi.ActorID,
 	ticket abi.SealRandomness,
 	pieces []abi.PieceInfo,
+	hasDeals bool,
 ) (phase1Output []byte, err error) {
 	sp, err := toFilRegisteredSealProof(proofType)
 	if err != nil {
@@ -349,7 +353,7 @@ func SealPreCommitPhase1(
 		return nil, err
 	}
 
-	resp := generated.FilSealPreCommitPhase1(sp, cacheDirPath, stagedSectorPath, sealedSectorPath, uint64(sectorNum), proverID, to32ByteArray(ticket), filPublicPieceInfos, filPublicPieceInfosLen)
+	resp := generated.FilSealPreCommitPhase1(sp, cacheDirPath, stagedSectorPath, sealedSectorPath, uint64(sectorNum), proverID, to32ByteArray(ticket), filPublicPieceInfos, filPublicPieceInfosLen, hasDeals)
 	resp.Deref()
 
 	defer generated.FilDestroySealPreCommitPhase1Response(resp)
@@ -881,9 +885,31 @@ func toFilPrivateReplicaInfo(src PrivateSectorInfo) (generated.FilPrivateReplica
 	out := generated.FilPrivateReplicaInfo{
 		RegisteredProof: pp,
 		CacheDirPath:    src.CacheDirPath,
-		CommR:           commR.Inner,
-		ReplicaPath:     src.SealedSectorPath,
-		SectorId:        uint64(src.SectorNumber),
+		CacheInOss:      src.CacheInOss,
+		CacheSectorPathInfo: generated.FilPrivateSectorPathInfo{
+			Url:         src.CacheSectorPathInfo.Url,
+			LandedDir:   src.CacheSectorPathInfo.LandedDir,
+			AccessKey:   src.CacheSectorPathInfo.AccessKey,
+			SecretKey:   src.CacheSectorPathInfo.SecretKey,
+			BucketName:  src.CacheSectorPathInfo.BucketName,
+			SectorName:  src.CacheSectorPathInfo.SectorName,
+			Region:      src.CacheSectorPathInfo.Region,
+			MultiRanges: src.CacheSectorPathInfo.MultiRanges,
+		},
+		CommR:        commR.Inner,
+		ReplicaPath:  src.SealedSectorPath,
+		ReplicaInOss: src.SealedInOss,
+		ReplicaSectorPathInfo: generated.FilPrivateSectorPathInfo{
+			Url:         src.SealedSectorPathInfo.Url,
+			LandedDir:   src.SealedSectorPathInfo.LandedDir,
+			AccessKey:   src.SealedSectorPathInfo.AccessKey,
+			SecretKey:   src.SealedSectorPathInfo.SecretKey,
+			BucketName:  src.SealedSectorPathInfo.BucketName,
+			SectorName:  src.SealedSectorPathInfo.SectorName,
+			Region:      src.SealedSectorPathInfo.Region,
+			MultiRanges: src.SealedSectorPathInfo.MultiRanges,
+		},
+		SectorId: uint64(src.SectorNumber),
 	}
 	_, allocs := out.PassRef()
 	return out, allocs.Free, nil
@@ -908,9 +934,31 @@ func toFilPrivateReplicaInfos(src []PrivateSectorInfo, typ string) ([]generated.
 		out[idx] = generated.FilPrivateReplicaInfo{
 			RegisteredProof: pp,
 			CacheDirPath:    src[idx].CacheDirPath,
-			CommR:           commR.Inner,
-			ReplicaPath:     src[idx].SealedSectorPath,
-			SectorId:        uint64(src[idx].SectorNumber),
+			CacheInOss:      src[idx].CacheInOss,
+			CacheSectorPathInfo: generated.FilPrivateSectorPathInfo{
+				Url:         src[idx].CacheSectorPathInfo.Url,
+				LandedDir:   src[idx].CacheSectorPathInfo.LandedDir,
+				AccessKey:   src[idx].CacheSectorPathInfo.AccessKey,
+				SecretKey:   src[idx].CacheSectorPathInfo.SecretKey,
+				BucketName:  src[idx].CacheSectorPathInfo.BucketName,
+				SectorName:  src[idx].CacheSectorPathInfo.SectorName,
+				Region:      src[idx].CacheSectorPathInfo.Region,
+				MultiRanges: src[idx].CacheSectorPathInfo.MultiRanges,
+			},
+			CommR:        commR.Inner,
+			ReplicaPath:  src[idx].SealedSectorPath,
+			ReplicaInOss: src[idx].SealedInOss,
+			ReplicaSectorPathInfo: generated.FilPrivateSectorPathInfo{
+				Url:         src[idx].SealedSectorPathInfo.Url,
+				LandedDir:   src[idx].SealedSectorPathInfo.LandedDir,
+				AccessKey:   src[idx].SealedSectorPathInfo.AccessKey,
+				SecretKey:   src[idx].SealedSectorPathInfo.SecretKey,
+				BucketName:  src[idx].SealedSectorPathInfo.BucketName,
+				SectorName:  src[idx].SealedSectorPathInfo.SectorName,
+				Region:      src[idx].SealedSectorPathInfo.Region,
+				MultiRanges: src[idx].SealedSectorPathInfo.MultiRanges,
+			},
+			SectorId: uint64(src[idx].SectorNumber),
 		}
 
 		_, allocs[idx] = out[idx].PassRef()
@@ -1157,4 +1205,28 @@ func toVanillaProofs(src [][]byte) ([]generated.FilVanillaProof, func()) {
 			allocs[idx].Free()
 		}
 	}
+}
+
+func InitLog() {
+	gofile := os.Getenv("GOLOG_FILE")
+	file := os.Getenv("RUSTLOG_FILE")
+	if len(file) == 0 {
+		if 0 < len(gofile) {
+			file = fmt.Sprintf("%v/rust-%v", path.Dir(gofile), path.Base(gofile))
+		} else {
+			file = "/var/log/lotus/rust-log.log"
+		}
+	}
+	if len(file) == 0 {
+		fmt.Printf("FFI log filename is not given\n")
+		return
+	}
+	filLogFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Printf("CANNOT open FFI log file %v: %v\n", file, err)
+		return
+	}
+	generated.FilInitLogFd(int32(filLogFile.Fd()))
+	// syscall.Dup2(int(filLogFile.Fd()), 1)
+	// syscall.Dup2(int(filLogFile.Fd()), 2)
 }

@@ -369,6 +369,7 @@ type FilPublicPieceInfo struct {
 	allocsd00025ac interface{}
 }
 
+<<<<<<< HEAD
 // FilPrivateReplicaInfo as declared in filecoin-ffi/filcrypto.h:331
 type FilPrivateReplicaInfo struct {
 	RegisteredProof FilRegisteredPoStProof
@@ -381,6 +382,45 @@ type FilPrivateReplicaInfo struct {
 }
 
 // FilPublicReplicaInfo as declared in filecoin-ffi/filcrypto.h:337
+=======
+// Fil32ByteArray as declared in filecoin-ffi/filcrypto.h:296
+type Fil32ByteArray struct {
+	Inner          [32]byte
+	ref373ec61a    *C.fil_32ByteArray
+	allocs373ec61a interface{}
+}
+
+// FilPrivateSectorPathInfo as declared in filecoin-ffi/filcrypto.h:307
+type FilPrivateSectorPathInfo struct {
+	Url            string
+	AccessKey      string
+	SecretKey      string
+	BucketName     string
+	LandedDir      string
+	SectorName     string
+	Region         string
+	MultiRanges    bool
+	ref5072832a    *C.fil_PrivateSectorPathInfo
+	allocs5072832a interface{}
+}
+
+// FilPrivateReplicaInfo as declared in filecoin-ffi/filcrypto.h:319
+type FilPrivateReplicaInfo struct {
+	RegisteredProof       FilRegisteredPoStProof
+	CacheDirPath          string
+	CacheInOss            bool
+	CacheSectorPathInfo   FilPrivateSectorPathInfo
+	CommR                 [32]byte
+	ReplicaPath           string
+	ReplicaInOss          bool
+	ReplicaSectorPathInfo FilPrivateSectorPathInfo
+	SectorId              uint64
+	ref81a31e9b           *C.fil_PrivateReplicaInfo
+	allocs81a31e9b        interface{}
+}
+
+// FilPublicReplicaInfo as declared in filecoin-ffi/filcrypto.h:325
+>>>>>>> entropy/entropy-b6e0b35fb49e
 type FilPublicReplicaInfo struct {
 	RegisteredProof FilRegisteredPoStProof
 	CommR           [32]byte

@@ -8,7 +8,7 @@ authors = [
   "laser <l@s3r.com>"
 ]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/filecoin-project/filecoin-ffi"
+repository = "https://github.com/EntropyPool/filecoin-ffi"
 readme = "README.md"
 edition = "2018"
 publish = false
@@ -32,15 +32,29 @@ rand = "0.7"
 rand_chacha = "0.2.1"
 rayon = "1.2.1"
 anyhow = "1.0.23"
-bellperson = { version = "0.14.1", default-features = false }
-serde_json = "1.0.46"
-rust-gpu-tools = "0.3.0"
-storage-proofs-porep = { version = "~8.0.1", default-features = false }
+# bellperson = { version = "0.14.1", default-features = false }
+# storage-proofs-porep = { version = "~8.0.1", default-features = false }
 
-[dependencies.filecoin-proofs-api]
-package = "filecoin-proofs-api"
-version = "8.0.1"
-default-features = false
+# [dependencies.filecoin-proofs-api]
+# package = "filecoin-proofs-api"
+# version = "8.0.1"
+# default-features = false
+bellperson = { path = "../../bellperson", default-features = false, features = ["cuda"]}
+serde_json = "1.0.46"
+
+rust-gpu-tools = "0.3.0"
+
+serde = "^1.0"
+lazy_static = "^1.4"
+reqwest = { version = "^0.10", features = ["blocking", "json"] }
+tokio = { version = "*", features = ["full"] }
+tokio-serde = { version = "*", features = ["json"] }
+
+neptune = "=1.1.1"
+neptune-triton = "=1.0.0"
+
+filecoin-proofs-api = { path = "../../rust-filecoin-proofs-api", default-features = false }
+filecoin-webapi = { path = "../../filecoin-webapi", default-features = false }
 
 [build-dependencies]
 cbindgen = "= 0.14.0"
@@ -49,9 +63,16 @@ cbindgen = "= 0.14.0"
 tempfile = "3.0.8"
 
 [features]
-default = ["pairing", "gpu", "multicore-sdr" ]
-pairing = ["filecoin-proofs-api/pairing", "bellperson/pairing", "storage-proofs-porep/pairing"]
-blst = ["filecoin-proofs-api/blst", "bellperson/blst", "storage-proofs-porep/blst"]
+# default = ["pairing", "gpu", "multicore-sdr" ]
+# pairing = ["filecoin-proofs-api/pairing", "bellperson/pairing", "storage-proofs-porep/pairing"]
+# blst = ["filecoin-proofs-api/blst", "bellperson/blst", "storage-proofs-porep/blst"]
+# blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
+# gpu = ["filecoin-proofs-api/gpu", "bellperson/gpu", "storage-proofs-porep/gpu"]
+# multicore-sdr = ["storage-proofs-porep/multicore-sdr"]
+default = ["pairing"]
+pairing = ["filecoin-proofs-api/pairing", "filecoin-webapi/pairing","bellperson/pairing"]
+blst = ["filecoin-proofs-api/blst", "filecoin-webapi/blst", "bellperson/blst"]
 blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
-gpu = ["filecoin-proofs-api/gpu", "bellperson/gpu", "storage-proofs-porep/gpu"]
-multicore-sdr = ["storage-proofs-porep/multicore-sdr"]
+
+[patch.crates-io]
+merkletree = { path = "../../merkletree" }
