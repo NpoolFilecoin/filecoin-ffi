@@ -9,7 +9,7 @@ use filecoin_proofs_api::seal::{
 };
 use filecoin_proofs_api::{
     PieceInfo, PrivateReplicaInfo, RegisteredPoStProof, RegisteredSealProof, SectorId,
-    StorageProofsError, UnpaddedByteIndex, UnpaddedBytesAmount,
+    StorageProofsError, UnpaddedByteIndex, UnpaddedBytesAmount, PrivateSectorPathInfo,
 };
 
 use bellperson::bls::Fr;
