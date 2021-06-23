@@ -3689,9 +3689,9 @@ func (x *FilPrivateSectorPathInfo) PassRef() (*C.fil_PrivateSectorPathInfo, *cgo
 	allocs5072832a := new(cgoAllocMap)
 	allocs5072832a.Add(mem5072832a)
 
-	var curl_allocs *cgoAllocMap
-	ref5072832a.url, curl_allocs = unpackPCharString(x.Url)
-	allocs5072832a.Borrow(curl_allocs)
+	var cendpoints_allocs *cgoAllocMap
+	ref5072832a.endpoints, cendpoints_allocs = unpackPCharString(x.Endpoints)
+	allocs5072832a.Borrow(cendpoints_allocs)
 
 	var caccess_key_allocs *cgoAllocMap
 	ref5072832a.access_key, caccess_key_allocs = unpackPCharString(x.AccessKey)
@@ -3742,7 +3742,7 @@ func (x *FilPrivateSectorPathInfo) Deref() {
 	if x.ref5072832a == nil {
 		return
 	}
-	x.Url = packPCharString(x.ref5072832a.url)
+	x.Endpoints = packPCharString(x.ref5072832a.endpoints)
 	x.AccessKey = packPCharString(x.ref5072832a.access_key)
 	x.SecretKey = packPCharString(x.ref5072832a.secret_key)
 	x.BucketName = packPCharString(x.ref5072832a.bucket_name)

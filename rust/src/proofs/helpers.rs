@@ -82,7 +82,7 @@ pub unsafe fn to_private_replica_info_map(
             let replica_path = c_str_to_rust_str(ffi_info.replica_path).to_string();
 
             let replica_sector_path_info = PrivateSectorPathInfo {
-                url: c_str_to_rust_str(ffi_info.replica_sector_path_info.url as *mut libc::c_char).to_string(),
+                endpoints: c_str_to_rust_str(ffi_info.replica_sector_path_info.endpoints as *mut libc::c_char).to_string(),
                 landed_dir: c_str_to_pbuf(ffi_info.replica_sector_path_info.landed_dir),
                 access_key: c_str_to_rust_str(ffi_info.replica_sector_path_info.access_key as *mut libc::c_char).to_string(),
                 secret_key: c_str_to_rust_str(ffi_info.replica_sector_path_info.secret_key as *mut libc::c_char).to_string(),
@@ -93,7 +93,7 @@ pub unsafe fn to_private_replica_info_map(
             };
 
             let cache_sector_path_info = PrivateSectorPathInfo {
-                url: c_str_to_rust_str(ffi_info.cache_sector_path_info.url as *mut libc::c_char).to_string(),
+                endpoints: c_str_to_rust_str(ffi_info.cache_sector_path_info.endpoints as *mut libc::c_char).to_string(),
                 landed_dir: c_str_to_pbuf(ffi_info.cache_sector_path_info.landed_dir),
                 access_key: c_str_to_rust_str(ffi_info.cache_sector_path_info.access_key as *mut libc::c_char).to_string(),
                 secret_key: c_str_to_rust_str(ffi_info.cache_sector_path_info.secret_key as *mut libc::c_char).to_string(),
