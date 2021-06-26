@@ -32,7 +32,7 @@ rand = "0.7"
 rand_chacha = "0.2.1"
 rayon = "1.2.1"
 anyhow = "1.0.23"
-bellperson = { version = "0.14.1", default-features = false }
+bellperson = { version = "0.14.1", default-features = false, features = ["cuda"] }
 storage-proofs-porep = { version = "~8.0.1", default-features = false }
 
 serde_json = "1.0.46"
@@ -65,6 +65,7 @@ blst = ["filecoin-proofs-api/blst", "bellperson/blst", "storage-proofs-porep/bls
 blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
 gpu = ["filecoin-proofs-api/gpu", "bellperson/gpu", "storage-proofs-porep/gpu"]
 multicore-sdr = ["storage-proofs-porep/multicore-sdr"]
+cuda = ["bellperson/cuda"]
 
 [patch.crates-io]
 merkletree = { path = "../../merkletree" }
@@ -74,3 +75,4 @@ storage-proofs-core = { path = "../../rust-fil-proofs/storage-proofs-core" }
 filecoin-proofs = { path = "../../rust-fil-proofs/filecoin-proofs", default-features = false }
 filecoin-hashers = { path = "../../rust-fil-proofs/filecoin-hashers", default-features = false }
 fr32 = { path = "../../rust-fil-proofs/fr32", default-features = false }
+bellperson = { path = "../../bellperson", default-features = false, features = ["cuda"] }
