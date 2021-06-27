@@ -862,9 +862,8 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
             replica_path,
         );
         */
-
         let replica_sector_path_info = PrivateSectorPathInfo {
-            url: c_str_to_rust_str(replica.replica_sector_path_info.url as *mut libc::c_char).to_string(),
+            endpoints: c_str_to_rust_str(replica.replica_sector_path_info.endpoints as *mut libc::c_char).to_string(),
             landed_dir: c_str_to_pbuf(replica.replica_sector_path_info.landed_dir),
             access_key: c_str_to_rust_str(replica.replica_sector_path_info.access_key as *mut libc::c_char).to_string(),
             secret_key: c_str_to_rust_str(replica.replica_sector_path_info.secret_key as *mut libc::c_char).to_string(),
@@ -875,7 +874,7 @@ pub unsafe extern "C" fn fil_generate_single_vanilla_proof(
         };
 
         let cache_sector_path_info = PrivateSectorPathInfo {
-            url: c_str_to_rust_str(replica.cache_sector_path_info.url as *mut libc::c_char).to_string(),
+            endpoints: c_str_to_rust_str(replica.cache_sector_path_info.endpoints as *mut libc::c_char).to_string(),
             landed_dir: c_str_to_pbuf(replica.cache_sector_path_info.landed_dir),
             access_key: c_str_to_rust_str(replica.cache_sector_path_info.access_key as *mut libc::c_char).to_string(),
             secret_key: c_str_to_rust_str(replica.cache_sector_path_info.secret_key as *mut libc::c_char).to_string(),

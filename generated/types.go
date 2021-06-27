@@ -371,7 +371,7 @@ type FilPublicPieceInfo struct {
 
 // FilPrivateSectorPathInfo as declared in filecoin-ffi/filcrypto.h:334
 type FilPrivateSectorPathInfo struct {
-	Url            string
+	Endpoints      string
 	AccessKey      string
 	SecretKey      string
 	BucketName     string
