@@ -4088,6 +4088,7 @@ dependencies = [
  "pretty_assertions",
  "rand 0.7.3",
  "rayon",
+ "rust-gpu-tools",
  "serde",
  "serde_json",
  "sha2 0.9.5",
