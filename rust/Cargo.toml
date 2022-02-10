@@ -1,49 +1,52 @@
 [package]
-name = "filcrypto"
-description = "FFI Interface to Filecoin Proofs"
-version = "0.7.5"
 authors = [
   "nemo <nemo@protocol.ai>",
   "dignifiedquire <me@dignifiedquire.com>",
-  "laser <l@s3r.com>"
+  "laser <l@s3r.com>",
 ]
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/filecoin-project/filecoin-ffi"
-readme = "README.md"
+description = "FFI Interface to Filecoin Proofs"
 edition = "2018"
+license = "MIT OR Apache-2.0"
+name = "filcrypto"
 publish = false
+readme = "README.md"
+repository = "https://github.com/EntropyPool/filecoin-ffi"
+version = "0.7.5"
 
 [lib]
 crate-type = ["rlib", "staticlib"]
 
 [dependencies]
-bls-signatures = { version = "0.11.0", default-features = false, features = ["blst"] }
+anyhow = "1.0.23"
+bellperson = {version = "0.18", default-features = false, features = ["opencl"]}
+bls-signatures = {version = "0.11.0", default-features = false, features = ["blst"]}
 blstrs = "0.4"
 byteorder = "1.2"
 drop_struct_macro_derive = "0.5.0"
-ff = { version = "0.3.1", package = "fff" }
+ff = {version = "0.3.1", package = "fff"}
 ffi-toolkit = "0.5.0"
+fil_logger = "0.1.0"
 filepath = "0.1.1"
+fr32 = {version = "~4.0", default-features = false}
 group = "0.11"
 libc = "0.2.58"
 log = "0.4.7"
-fil_logger = "0.1.0"
+memmap = "0.7"
 rand = "0.8"
 rand_chacha = "0.3.1"
 rayon = "1.2.1"
-anyhow = "1.0.23"
-bellperson = { version = "0.18", default-features = false }
+rust-gpu-tools = {version = "0.5", default-features = false}
 serde_json = "1.0.46"
-memmap = "0.7"
-rust-gpu-tools = { version = "0.5", default-features = false }
-storage-proofs-porep = { version = "~11.0", default-features = false }
-fr32 = { version = "~4.0", default-features = false }
+storage-proofs-porep = {version = "~11.0", default-features = false}
 
-[dependencies.filecoin-proofs-api]
-package = "filecoin-proofs-api"
-version = "11.0"
-git = "https://github.com/filecoin-project/rust-filecoin-proofs-api"
-default-features = false
+lazy_static = "1.4.0"
+reqwest = {version = "0.11.9", features = ["blocking", "json"]}
+serde = "^1.0"
+tokio = {version = "*", features = ["full"]}
+tokio-serde = {version = "*", features = ["json"]}
+
+filecoin-proofs-api = {path = "../../rust-filecoin-proofs-api", default-features = false}
+filecoin-webapi = {path = "../../filecoin-webapi", default-features = false}
 
 [build-dependencies]
 cbindgen = "= 0.14.0"
@@ -52,8 +55,18 @@ cbindgen = "= 0.14.0"
 tempfile = "3.0.8"
 
 [features]
-default = ["opencl", "multicore-sdr" ]
 blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
-opencl = ["filecoin-proofs-api/opencl", "bellperson/opencl", "storage-proofs-porep/opencl", "rust-gpu-tools/opencl"]
 cuda = ["filecoin-proofs-api/cuda", "bellperson/cuda", "storage-proofs-porep/cuda", "rust-gpu-tools/cuda"]
+default = ["opencl", "multicore-sdr"]
 multicore-sdr = ["storage-proofs-porep/multicore-sdr"]
+opencl = ["filecoin-proofs-api/opencl", "bellperson/opencl", "storage-proofs-porep/opencl", "rust-gpu-tools/opencl"]
+
+[patch.crates-io]
+bellperson = {path = "../../bellperson", default-features = false, features = ["opencl"]}
+filecoin-hashers = {path = "../../rust-fil-proofs/filecoin-hashers", default-features = false}
+filecoin-proofs = {path = "../../rust-fil-proofs/filecoin-proofs", default-features = false}
+filecoin-proofs-api = {path = "../../rust-filecoin-proofs-api"}
+fr32 = {path = "../../rust-fil-proofs/fr32", default-features = false}
+merkletree = {path = "../../merkletree"}
+storage-proofs-core = {path = "../../rust-fil-proofs/storage-proofs-core"}
+storage-proofs-porep = {path = "../../rust-fil-proofs/storage-proofs-porep"}

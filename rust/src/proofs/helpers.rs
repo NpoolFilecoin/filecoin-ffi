@@ -4,7 +4,7 @@ use std::slice::from_raw_parts;
 
 use anyhow::{ensure, Result};
 use ffi_toolkit::{c_str_to_pbuf, c_str_to_rust_str};
-use filecoin_proofs_api::{PrivateReplicaInfo, PublicReplicaInfo, SectorId};
+use filecoin_proofs_api::{PrivateReplicaInfo, PublicReplicaInfo, SectorId, PrivateSectorPathInfo};
 
 use super::types::{fil_PrivateReplicaInfo, fil_PublicReplicaInfo, fil_RegisteredPoStProof};
 use crate::proofs::types::{
@@ -61,8 +61,12 @@ pub unsafe fn to_public_replica_info_map(
 struct PrivateReplicaInfoTmp {
     pub registered_proof: fil_RegisteredPoStProof,
     pub cache_dir_path: std::path::PathBuf,
+    pub cache_in_oss: bool,
+    pub cache_sector_path_info: PrivateSectorPathInfo,
     pub comm_r: [u8; 32],
     pub replica_path: std::path::PathBuf,
+    pub replica_in_oss: bool,
+    pub replica_sector_path_info: PrivateSectorPathInfo,
     pub sector_id: u64,
 }
 
@@ -80,11 +84,37 @@ pub unsafe fn to_private_replica_info_map(
             let cache_dir_path = c_str_to_pbuf(ffi_info.cache_dir_path);
             let replica_path = c_str_to_rust_str(ffi_info.replica_path).to_string();
 
+            let replica_sector_path_info = PrivateSectorPathInfo {
+                endpoints: c_str_to_rust_str(ffi_info.replica_sector_path_info.endpoints as *mut libc::c_char).to_string(),
+                landed_dir: c_str_to_pbuf(ffi_info.replica_sector_path_info.landed_dir),
+                access_key: c_str_to_rust_str(ffi_info.replica_sector_path_info.access_key as *mut libc::c_char).to_string(),
+                secret_key: c_str_to_rust_str(ffi_info.replica_sector_path_info.secret_key as *mut libc::c_char).to_string(),
+                bucket_name: c_str_to_rust_str(ffi_info.replica_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
+                sector_name: c_str_to_rust_str(ffi_info.replica_sector_path_info.sector_name as *mut libc::c_char).to_string(),
+                region: c_str_to_rust_str(ffi_info.replica_sector_path_info.region as *mut libc::c_char).to_string(),
+                multi_ranges: ffi_info.replica_sector_path_info.multi_ranges,
+            };
+
+            let cache_sector_path_info = PrivateSectorPathInfo {
+                endpoints: c_str_to_rust_str(ffi_info.cache_sector_path_info.endpoints as *mut libc::c_char).to_string(),
+                landed_dir: c_str_to_pbuf(ffi_info.cache_sector_path_info.landed_dir),
+                access_key: c_str_to_rust_str(ffi_info.cache_sector_path_info.access_key as *mut libc::c_char).to_string(),
+                secret_key: c_str_to_rust_str(ffi_info.cache_sector_path_info.secret_key as *mut libc::c_char).to_string(),
+                bucket_name: c_str_to_rust_str(ffi_info.cache_sector_path_info.bucket_name as *mut libc::c_char).to_string(),
+                sector_name: c_str_to_rust_str(ffi_info.cache_sector_path_info.sector_name as *mut libc::c_char).to_string(),
+                region: c_str_to_rust_str(ffi_info.cache_sector_path_info.region as *mut libc::c_char).to_string(),
+                multi_ranges: ffi_info.cache_sector_path_info.multi_ranges,
+            };
+
             PrivateReplicaInfoTmp {
                 registered_proof: ffi_info.registered_proof,
                 cache_dir_path,
+                cache_in_oss: ffi_info.cache_in_oss,
+                cache_sector_path_info: cache_sector_path_info,
                 comm_r: ffi_info.comm_r,
                 replica_path: PathBuf::from(replica_path),
+                replica_in_oss: ffi_info.replica_in_oss,
+                replica_sector_path_info: replica_sector_path_info,
                 sector_id: ffi_info.sector_id,
             }
         })
@@ -96,18 +126,34 @@ pub unsafe fn to_private_replica_info_map(
             let PrivateReplicaInfoTmp {
                 registered_proof,
                 cache_dir_path,
+                cache_in_oss,
+                cache_sector_path_info,
                 comm_r,
                 replica_path,
+                replica_in_oss,
+                replica_sector_path_info,
                 sector_id,
             } = info;
 
             (
                 SectorId::from(sector_id),
+                /*
                 PrivateReplicaInfo::new(
                     registered_proof.into(),
                     comm_r,
                     cache_dir_path,
                     replica_path,
+                ),
+                */
+                PrivateReplicaInfo::new_with_oss_config(
+                    registered_proof.into(),
+                    replica_path,
+                    replica_in_oss,
+                    replica_sector_path_info,
+                    comm_r,
+                    cache_dir_path,
+                    cache_in_oss,
+                    cache_sector_path_info,
                 ),
             )
         })

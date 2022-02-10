@@ -1,6 +1,9 @@
 use std::ffi::CString;
 use std::fs::File;
-use std::os::unix::io::FromRawFd;
+use std::fs::OpenOptions;
+use std::path::PathBuf;
+
+// use std::os::unix::io::FromRawFd;
 use std::sync::Once;
 
 use ffi_toolkit::{catch_panic_response, raw_ptr, rust_str_to_c_str, FCPResponseStatus};
@@ -12,9 +15,9 @@ static LOG_INIT: Once = Once::new();
 
 /// Ensures the logger is initialized.
 pub fn init_log() {
-    LOG_INIT.call_once(|| {
-        fil_logger::init();
-    });
+    // LOG_INIT.call_once(|| {
+    //     fil_logger::init();
+    // });
 }
 /// Initialize the logger with a file to log into
 ///
@@ -66,9 +69,18 @@ pub unsafe extern "C" fn fil_get_gpu_devices() -> *mut fil_GpuDeviceResponse {
 /// be initializes implicitely and log to stderr.
 #[no_mangle]
 #[cfg(not(target_os = "windows"))]
-pub unsafe extern "C" fn fil_init_log_fd(log_fd: libc::c_int) -> *mut fil_InitLogFdResponse {
+pub unsafe extern "C" fn fil_init_log_fd(_log_fd: libc::c_int) -> *mut fil_InitLogFdResponse {
     catch_panic_response(|| {
-        let file = File::from_raw_fd(log_fd);
+        // let file = File::from_raw_fd(log_fd);
+        let log_file_path = match std::env::var("GOLOG_FILE") {
+            Ok(file_path) => {
+                let mut path = PathBuf::from(file_path);
+                path.set_file_name("rust-".to_owned() + &path.file_name().unwrap().to_os_string().into_string().unwrap());
+                path
+            },
+            Err(_) => PathBuf::from("/var/log/lotus/rust-log.log"),
+        };
+        let file = OpenOptions::new().read(true).write(true).create(true).open(log_file_path).unwrap();
         let mut response = fil_InitLogFdResponse::default();
         if init_log_with_file(file).is_none() {
             response.status_code = FCPResponseStatus::FCPUnclassifiedError;
