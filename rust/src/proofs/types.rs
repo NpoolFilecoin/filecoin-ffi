@@ -441,17 +441,34 @@ impl Drop for fil_PartitionProof {
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
+pub struct fil_PrivateSectorPathInfo {
+    pub endpoints: *const libc::c_char, // split by comma(,)
+    pub access_key: *const libc::c_char,
+    pub secret_key: *const libc::c_char,
+    pub bucket_name: *const libc::c_char,
+    pub landed_dir: *const libc::c_char,
+    pub sector_name: *const libc::c_char,
+    pub region: *const libc::c_char,
+    pub multi_ranges: bool,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone)]
 pub struct fil_PrivateReplicaInfo {
     pub registered_proof: fil_RegisteredPoStProof,
     pub cache_dir_path: *const libc::c_char,
+    pub cache_in_oss: bool,
+    pub cache_sector_path_info: fil_PrivateSectorPathInfo,
     pub comm_r: [u8; 32],
     pub replica_path: *const libc::c_char,
+    pub replica_in_oss: bool,
+    pub replica_sector_path_info: fil_PrivateSectorPathInfo,
     pub sector_id: u64,
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct fil_PublicReplicaInfo {
     pub registered_proof: fil_RegisteredPoStProof,
     pub comm_r: [u8; 32],
