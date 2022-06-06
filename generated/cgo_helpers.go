@@ -69,6 +69,297 @@ func (a *cgoAllocMap) Free() {
 	a.mux.Unlock()
 }
 
+// allocFilGpuDeviceResponseMemory allocates memory for type C.fil_GpuDeviceResponse in C.
+// The caller is responsible for freeing the this memory via C.free.
+func allocFilGpuDeviceResponseMemory(n int) unsafe.Pointer {
+	mem, err := C.calloc(C.size_t(n), (C.size_t)(sizeOfFilGpuDeviceResponseValue))
+	if mem == nil {
+		panic(fmt.Sprintln("memory alloc error: ", err))
+	}
+	return mem
+}
+
+const sizeOfFilGpuDeviceResponseValue = unsafe.Sizeof([1]C.fil_GpuDeviceResponse{})
+
+// unpackPCharString copies the data from Go string as *C.char.
+func unpackPCharString(str string) (*C.char, *cgoAllocMap) {
+	allocs := new(cgoAllocMap)
+	defer runtime.SetFinalizer(allocs, func(a *cgoAllocMap) {
+		go a.Free()
+	})
+
+	str = safeString(str)
+	mem0 := unsafe.Pointer(C.CString(str))
+	allocs.Add(mem0)
+	return (*C.char)(mem0), allocs
+}
+
+type stringHeader struct {
+	Data unsafe.Pointer
+	Len  int
+}
+
+// safeString ensures that the string is NULL-terminated, a NULL-terminated copy is created otherwise.
+func safeString(str string) string {
+	if len(str) > 0 && str[len(str)-1] != '\x00' {
+		str = str + "\x00"
+	} else if len(str) == 0 {
+		str = "\x00"
+	}
+	return str
+}
+
+type sliceHeader struct {
+	Data unsafe.Pointer
+	Len  int
+	Cap  int
+}
+
+// allocPCharMemory allocates memory for type *C.char in C.
+// The caller is responsible for freeing the this memory via C.free.
+func allocPCharMemory(n int) unsafe.Pointer {
+	mem, err := C.calloc(C.size_t(n), (C.size_t)(sizeOfPCharValue))
+	if mem == nil {
+		panic(fmt.Sprintln("memory alloc error: ", err))
+	}
+	return mem
+}
+
+const sizeOfPCharValue = unsafe.Sizeof([1]*C.char{})
+
+const sizeOfPtr = unsafe.Sizeof(&struct{}{})
+
+// unpackSString transforms a sliced Go data structure into plain C format.
+func unpackSString(x []string) (unpacked **C.char, allocs *cgoAllocMap) {
+	if x == nil {
+		return nil, nil
+	}
+	allocs = new(cgoAllocMap)
+	defer runtime.SetFinalizer(allocs, func(a *cgoAllocMap) {
+		go a.Free()
+	})
+
+	len0 := len(x)
+	mem0 := allocPCharMemory(len0)
+	allocs.Add(mem0)
+	h0 := &sliceHeader{
+		Data: mem0,
+		Cap:  len0,
+		Len:  len0,
+	}
+	v0 := *(*[]*C.char)(unsafe.Pointer(h0))
+	for i0 := range x {
+		v0[i0], _ = unpackPCharString(x[i0])
+	}
+	h := (*sliceHeader)(unsafe.Pointer(&v0))
+	unpacked = (**C.char)(h.Data)
+	return
+}
+
+// packPCharString creates a Go string backed by *C.char and avoids copying.
+func packPCharString(p *C.char) (raw string) {
+	if p != nil && *p != 0 {
+		h := (*stringHeader)(unsafe.Pointer(&raw))
+		h.Data = unsafe.Pointer(p)
+		for *p != 0 {
+			p = (*C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + 1)) // p++
+		}
+		h.Len = int(uintptr(unsafe.Pointer(p)) - uintptr(h.Data))
+	}
+	return
+}
+
+// RawString reperesents a string backed by data on the C side.
+type RawString string
+
+// Copy returns a Go-managed copy of raw string.
+func (raw RawString) Copy() string {
+	if len(raw) == 0 {
+		return ""
+	}
+	h := (*stringHeader)(unsafe.Pointer(&raw))
+	return C.GoStringN((*C.char)(h.Data), C.int(h.Len))
+}
+
+// packSString reads sliced Go data structure out from plain C format.
+func packSString(v []string, ptr0 **C.char) {
+	const m = 0x7fffffff
+	for i0 := range v {
+		ptr1 := (*(*[m / sizeOfPtr]*C.char)(unsafe.Pointer(ptr0)))[i0]
+		v[i0] = packPCharString(ptr1)
+	}
+}
+
+// Ref returns the underlying reference to C object or nil if struct is nil.
+func (x *FilGpuDeviceResponse) Ref() *C.fil_GpuDeviceResponse {
+	if x == nil {
+		return nil
+	}
+	return x.ref58f92915
+}
+
+// Free invokes alloc map's free mechanism that cleanups any allocated memory using C free.
+// Does nothing if struct is nil or has no allocation map.
+func (x *FilGpuDeviceResponse) Free() {
+	if x != nil && x.allocs58f92915 != nil {
+		x.allocs58f92915.(*cgoAllocMap).Free()
+		x.ref58f92915 = nil
+	}
+}
+
+// NewFilGpuDeviceResponseRef creates a new wrapper struct with underlying reference set to the original C object.
+// Returns nil if the provided pointer to C object is nil too.
+func NewFilGpuDeviceResponseRef(ref unsafe.Pointer) *FilGpuDeviceResponse {
+	if ref == nil {
+		return nil
+	}
+	obj := new(FilGpuDeviceResponse)
+	obj.ref58f92915 = (*C.fil_GpuDeviceResponse)(unsafe.Pointer(ref))
+	return obj
+}
+
+// PassRef returns the underlying C object, otherwise it will allocate one and set its values
+// from this wrapping struct, counting allocations into an allocation map.
+func (x *FilGpuDeviceResponse) PassRef() (*C.fil_GpuDeviceResponse, *cgoAllocMap) {
+	if x == nil {
+		return nil, nil
+	} else if x.ref58f92915 != nil {
+		return x.ref58f92915, nil
+	}
+	mem58f92915 := allocFilGpuDeviceResponseMemory(1)
+	ref58f92915 := (*C.fil_GpuDeviceResponse)(mem58f92915)
+	allocs58f92915 := new(cgoAllocMap)
+	allocs58f92915.Add(mem58f92915)
+
+	var cstatus_code_allocs *cgoAllocMap
+	ref58f92915.status_code, cstatus_code_allocs = (C.enum_FCPResponseStatus)(x.StatusCode), cgoAllocsUnknown
+	allocs58f92915.Borrow(cstatus_code_allocs)
+
+	var cerror_msg_allocs *cgoAllocMap
+	ref58f92915.error_msg, cerror_msg_allocs = unpackPCharString(x.ErrorMsg)
+	allocs58f92915.Borrow(cerror_msg_allocs)
+
+	var cdevices_len_allocs *cgoAllocMap
+	ref58f92915.devices_len, cdevices_len_allocs = (C.size_t)(x.DevicesLen), cgoAllocsUnknown
+	allocs58f92915.Borrow(cdevices_len_allocs)
+
+	var cdevices_ptr_allocs *cgoAllocMap
+	ref58f92915.devices_ptr, cdevices_ptr_allocs = unpackSString(x.DevicesPtr)
+	allocs58f92915.Borrow(cdevices_ptr_allocs)
+
+	x.ref58f92915 = ref58f92915
+	x.allocs58f92915 = allocs58f92915
+	return ref58f92915, allocs58f92915
+
+}
+
+// PassValue does the same as PassRef except that it will try to dereference the returned pointer.
+func (x FilGpuDeviceResponse) PassValue() (C.fil_GpuDeviceResponse, *cgoAllocMap) {
+	if x.ref58f92915 != nil {
+		return *x.ref58f92915, nil
+	}
+	ref, allocs := x.PassRef()
+	return *ref, allocs
+}
+
+// Deref uses the underlying reference to C object and fills the wrapping struct with values.
+// Do not forget to call this method whether you get a struct for C object and want to read its values.
+func (x *FilGpuDeviceResponse) Deref() {
+	if x.ref58f92915 == nil {
+		return
+	}
+	x.StatusCode = (FCPResponseStatus)(x.ref58f92915.status_code)
+	x.ErrorMsg = packPCharString(x.ref58f92915.error_msg)
+	x.DevicesLen = (uint)(x.ref58f92915.devices_len)
+	packSString(x.DevicesPtr, x.ref58f92915.devices_ptr)
+}
+
+// allocFilInitLogFdResponseMemory allocates memory for type C.fil_InitLogFdResponse in C.
+// The caller is responsible for freeing the this memory via C.free.
+func allocFilInitLogFdResponseMemory(n int) unsafe.Pointer {
+	mem, err := C.calloc(C.size_t(n), (C.size_t)(sizeOfFilInitLogFdResponseValue))
+	if mem == nil {
+		panic(fmt.Sprintln("memory alloc error: ", err))
+	}
+	return mem
+}
+
+const sizeOfFilInitLogFdResponseValue = unsafe.Sizeof([1]C.fil_InitLogFdResponse{})
+
+// Ref returns the underlying reference to C object or nil if struct is nil.
+func (x *FilInitLogFdResponse) Ref() *C.fil_InitLogFdResponse {
+	if x == nil {
+		return nil
+	}
+	return x.ref3c1a0a08
+}
+
+// Free invokes alloc map's free mechanism that cleanups any allocated memory using C free.
+// Does nothing if struct is nil or has no allocation map.
+func (x *FilInitLogFdResponse) Free() {
+	if x != nil && x.allocs3c1a0a08 != nil {
+		x.allocs3c1a0a08.(*cgoAllocMap).Free()
+		x.ref3c1a0a08 = nil
+	}
+}
+
+// NewFilInitLogFdResponseRef creates a new wrapper struct with underlying reference set to the original C object.
+// Returns nil if the provided pointer to C object is nil too.
+func NewFilInitLogFdResponseRef(ref unsafe.Pointer) *FilInitLogFdResponse {
+	if ref == nil {
+		return nil
+	}
+	obj := new(FilInitLogFdResponse)
+	obj.ref3c1a0a08 = (*C.fil_InitLogFdResponse)(unsafe.Pointer(ref))
+	return obj
+}
+
+// PassRef returns the underlying C object, otherwise it will allocate one and set its values
+// from this wrapping struct, counting allocations into an allocation map.
+func (x *FilInitLogFdResponse) PassRef() (*C.fil_InitLogFdResponse, *cgoAllocMap) {
+	if x == nil {
+		return nil, nil
+	} else if x.ref3c1a0a08 != nil {
+		return x.ref3c1a0a08, nil
+	}
+	mem3c1a0a08 := allocFilInitLogFdResponseMemory(1)
+	ref3c1a0a08 := (*C.fil_InitLogFdResponse)(mem3c1a0a08)
+	allocs3c1a0a08 := new(cgoAllocMap)
+	allocs3c1a0a08.Add(mem3c1a0a08)
+
+	var cstatus_code_allocs *cgoAllocMap
+	ref3c1a0a08.status_code, cstatus_code_allocs = (C.enum_FCPResponseStatus)(x.StatusCode), cgoAllocsUnknown
+	allocs3c1a0a08.Borrow(cstatus_code_allocs)
+
+	var cerror_msg_allocs *cgoAllocMap
+	ref3c1a0a08.error_msg, cerror_msg_allocs = unpackPCharString(x.ErrorMsg)
+	allocs3c1a0a08.Borrow(cerror_msg_allocs)
+
+	x.ref3c1a0a08 = ref3c1a0a08
+	x.allocs3c1a0a08 = allocs3c1a0a08
+	return ref3c1a0a08, allocs3c1a0a08
+
+}
+
+// PassValue does the same as PassRef except that it will try to dereference the returned pointer.
+func (x FilInitLogFdResponse) PassValue() (C.fil_InitLogFdResponse, *cgoAllocMap) {
+	if x.ref3c1a0a08 != nil {
+		return *x.ref3c1a0a08, nil
+	}
+	ref, allocs := x.PassRef()
+	return *ref, allocs
+}
+
+// Deref uses the underlying reference to C object and fills the wrapping struct with values.
+// Do not forget to call this method whether you get a struct for C object and want to read its values.
+func (x *FilInitLogFdResponse) Deref() {
+	if x.ref3c1a0a08 == nil {
+		return
+	}
+	x.StatusCode = (FCPResponseStatus)(x.ref3c1a0a08.status_code)
+	x.ErrorMsg = packPCharString(x.ref3c1a0a08.error_msg)
+}
+
 // allocFilBLSDigestMemory allocates memory for type C.fil_BLSDigest in C.
 // The caller is responsible for freeing the this memory via C.free.
 func allocFilBLSDigestMemory(n int) unsafe.Pointer {
@@ -972,59 +1263,6 @@ func allocFilCreateFvmMachineResponseMemory(n int) unsafe.Pointer {
 
 const sizeOfFilCreateFvmMachineResponseValue = unsafe.Sizeof([1]C.fil_CreateFvmMachineResponse{})
 
-// unpackPCharString copies the data from Go string as *C.char.
-func unpackPCharString(str string) (*C.char, *cgoAllocMap) {
-	allocs := new(cgoAllocMap)
-	defer runtime.SetFinalizer(allocs, func(a *cgoAllocMap) {
-		go a.Free()
-	})
-
-	str = safeString(str)
-	mem0 := unsafe.Pointer(C.CString(str))
-	allocs.Add(mem0)
-	return (*C.char)(mem0), allocs
-}
-
-type stringHeader struct {
-	Data unsafe.Pointer
-	Len  int
-}
-
-// safeString ensures that the string is NULL-terminated, a NULL-terminated copy is created otherwise.
-func safeString(str string) string {
-	if len(str) > 0 && str[len(str)-1] != '\x00' {
-		str = str + "\x00"
-	} else if len(str) == 0 {
-		str = "\x00"
-	}
-	return str
-}
-
-// packPCharString creates a Go string backed by *C.char and avoids copying.
-func packPCharString(p *C.char) (raw string) {
-	if p != nil && *p != 0 {
-		h := (*stringHeader)(unsafe.Pointer(&raw))
-		h.Data = unsafe.Pointer(p)
-		for *p != 0 {
-			p = (*C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + 1)) // p++
-		}
-		h.Len = int(uintptr(unsafe.Pointer(p)) - uintptr(h.Data))
-	}
-	return
-}
-
-// RawString reperesents a string backed by data on the C side.
-type RawString string
-
-// Copy returns a Go-managed copy of raw string.
-func (raw RawString) Copy() string {
-	if len(raw) == 0 {
-		return ""
-	}
-	h := (*stringHeader)(unsafe.Pointer(&raw))
-	return C.GoStringN((*C.char)(h.Data), C.int(h.Len))
-}
-
 // Ref returns the underlying reference to C object or nil if struct is nil.
 func (x *FilCreateFvmMachineResponse) Ref() *C.fil_CreateFvmMachineResponse {
 	if x == nil {
@@ -1131,12 +1369,6 @@ func copyPUint8TBytes(slice *sliceHeader) (*C.uint8_t, *cgoAllocMap) {
 	allocs.Add(mem0)
 
 	return (*C.uint8_t)(mem0), allocs
-}
-
-type sliceHeader struct {
-	Data unsafe.Pointer
-	Len  int
-	Cap  int
 }
 
 // allocUint8TMemory allocates memory for type C.uint8_t in C.
@@ -2169,8 +2401,6 @@ func allocStructFilAggregationInputsMemory(n int) unsafe.Pointer {
 
 const sizeOfStructFilAggregationInputsValue = unsafe.Sizeof([1]C.struct_fil_AggregationInputs{})
 
-const sizeOfPtr = unsafe.Sizeof(&struct{}{})
-
 // unpackSFilAggregationInputs transforms a sliced Go data structure into plain C format.
 func unpackSFilAggregationInputs(x []FilAggregationInputs) (unpacked *C.struct_fil_AggregationInputs, allocs *cgoAllocMap) {
 	if x == nil {
@@ -3104,6 +3334,122 @@ func (x *FilGenerateSingleVanillaProofResponse) Deref() {
 	x.StatusCode = (FCPResponseStatus)(x.reff9d21b04.status_code)
 }
 
+// allocFilPrivateSectorPathInfoMemory allocates memory for type C.fil_PrivateSectorPathInfo in C.
+// The caller is responsible for freeing the this memory via C.free.
+func allocFilPrivateSectorPathInfoMemory(n int) unsafe.Pointer {
+	mem, err := C.calloc(C.size_t(n), (C.size_t)(sizeOfFilPrivateSectorPathInfoValue))
+	if mem == nil {
+		panic(fmt.Sprintln("memory alloc error: ", err))
+	}
+	return mem
+}
+
+const sizeOfFilPrivateSectorPathInfoValue = unsafe.Sizeof([1]C.fil_PrivateSectorPathInfo{})
+
+// Ref returns the underlying reference to C object or nil if struct is nil.
+func (x *FilPrivateSectorPathInfo) Ref() *C.fil_PrivateSectorPathInfo {
+	if x == nil {
+		return nil
+	}
+	return x.ref5072832a
+}
+
+// Free invokes alloc map's free mechanism that cleanups any allocated memory using C free.
+// Does nothing if struct is nil or has no allocation map.
+func (x *FilPrivateSectorPathInfo) Free() {
+	if x != nil && x.allocs5072832a != nil {
+		x.allocs5072832a.(*cgoAllocMap).Free()
+		x.ref5072832a = nil
+	}
+}
+
+// NewFilPrivateSectorPathInfoRef creates a new wrapper struct with underlying reference set to the original C object.
+// Returns nil if the provided pointer to C object is nil too.
+func NewFilPrivateSectorPathInfoRef(ref unsafe.Pointer) *FilPrivateSectorPathInfo {
+	if ref == nil {
+		return nil
+	}
+	obj := new(FilPrivateSectorPathInfo)
+	obj.ref5072832a = (*C.fil_PrivateSectorPathInfo)(unsafe.Pointer(ref))
+	return obj
+}
+
+// PassRef returns the underlying C object, otherwise it will allocate one and set its values
+// from this wrapping struct, counting allocations into an allocation map.
+func (x *FilPrivateSectorPathInfo) PassRef() (*C.fil_PrivateSectorPathInfo, *cgoAllocMap) {
+	if x == nil {
+		return nil, nil
+	} else if x.ref5072832a != nil {
+		return x.ref5072832a, nil
+	}
+	mem5072832a := allocFilPrivateSectorPathInfoMemory(1)
+	ref5072832a := (*C.fil_PrivateSectorPathInfo)(mem5072832a)
+	allocs5072832a := new(cgoAllocMap)
+	allocs5072832a.Add(mem5072832a)
+
+	var cendpoints_allocs *cgoAllocMap
+	ref5072832a.endpoints, cendpoints_allocs = unpackPCharString(x.Endpoints)
+	allocs5072832a.Borrow(cendpoints_allocs)
+
+	var caccess_key_allocs *cgoAllocMap
+	ref5072832a.access_key, caccess_key_allocs = unpackPCharString(x.AccessKey)
+	allocs5072832a.Borrow(caccess_key_allocs)
+
+	var csecret_key_allocs *cgoAllocMap
+	ref5072832a.secret_key, csecret_key_allocs = unpackPCharString(x.SecretKey)
+	allocs5072832a.Borrow(csecret_key_allocs)
+
+	var cbucket_name_allocs *cgoAllocMap
+	ref5072832a.bucket_name, cbucket_name_allocs = unpackPCharString(x.BucketName)
+	allocs5072832a.Borrow(cbucket_name_allocs)
+
+	var clanded_dir_allocs *cgoAllocMap
+	ref5072832a.landed_dir, clanded_dir_allocs = unpackPCharString(x.LandedDir)
+	allocs5072832a.Borrow(clanded_dir_allocs)
+
+	var csector_name_allocs *cgoAllocMap
+	ref5072832a.sector_name, csector_name_allocs = unpackPCharString(x.SectorName)
+	allocs5072832a.Borrow(csector_name_allocs)
+
+	var cregion_allocs *cgoAllocMap
+	ref5072832a.region, cregion_allocs = unpackPCharString(x.Region)
+	allocs5072832a.Borrow(cregion_allocs)
+
+	var cmulti_ranges_allocs *cgoAllocMap
+	ref5072832a.multi_ranges, cmulti_ranges_allocs = (C._Bool)(x.MultiRanges), cgoAllocsUnknown
+	allocs5072832a.Borrow(cmulti_ranges_allocs)
+
+	x.ref5072832a = ref5072832a
+	x.allocs5072832a = allocs5072832a
+	return ref5072832a, allocs5072832a
+
+}
+
+// PassValue does the same as PassRef except that it will try to dereference the returned pointer.
+func (x FilPrivateSectorPathInfo) PassValue() (C.fil_PrivateSectorPathInfo, *cgoAllocMap) {
+	if x.ref5072832a != nil {
+		return *x.ref5072832a, nil
+	}
+	ref, allocs := x.PassRef()
+	return *ref, allocs
+}
+
+// Deref uses the underlying reference to C object and fills the wrapping struct with values.
+// Do not forget to call this method whether you get a struct for C object and want to read its values.
+func (x *FilPrivateSectorPathInfo) Deref() {
+	if x.ref5072832a == nil {
+		return
+	}
+	x.Endpoints = packPCharString(x.ref5072832a.endpoints)
+	x.AccessKey = packPCharString(x.ref5072832a.access_key)
+	x.SecretKey = packPCharString(x.ref5072832a.secret_key)
+	x.BucketName = packPCharString(x.ref5072832a.bucket_name)
+	x.LandedDir = packPCharString(x.ref5072832a.landed_dir)
+	x.SectorName = packPCharString(x.ref5072832a.sector_name)
+	x.Region = packPCharString(x.ref5072832a.region)
+	x.MultiRanges = (bool)(x.ref5072832a.multi_ranges)
+}
+
 // allocFilPrivateReplicaInfoMemory allocates memory for type C.fil_PrivateReplicaInfo in C.
 // The caller is responsible for freeing the this memory via C.free.
 func allocFilPrivateReplicaInfoMemory(n int) unsafe.Pointer {
@@ -3165,6 +3511,14 @@ func (x *FilPrivateReplicaInfo) PassRef() (*C.fil_PrivateReplicaInfo, *cgoAllocM
 	ref81a31e9b.cache_dir_path, ccache_dir_path_allocs = unpackPCharString(x.CacheDirPath)
 	allocs81a31e9b.Borrow(ccache_dir_path_allocs)
 
+	var ccache_in_oss_allocs *cgoAllocMap
+	ref81a31e9b.cache_in_oss, ccache_in_oss_allocs = (C._Bool)(x.CacheInOss), cgoAllocsUnknown
+	allocs81a31e9b.Borrow(ccache_in_oss_allocs)
+
+	var ccache_sector_path_info_allocs *cgoAllocMap
+	ref81a31e9b.cache_sector_path_info, ccache_sector_path_info_allocs = x.CacheSectorPathInfo.PassValue()
+	allocs81a31e9b.Borrow(ccache_sector_path_info_allocs)
+
 	var ccomm_r_allocs *cgoAllocMap
 	ref81a31e9b.comm_r, ccomm_r_allocs = *(*[32]C.uint8_t)(unsafe.Pointer(&x.CommR)), cgoAllocsUnknown
 	allocs81a31e9b.Borrow(ccomm_r_allocs)
@@ -3172,6 +3526,14 @@ func (x *FilPrivateReplicaInfo) PassRef() (*C.fil_PrivateReplicaInfo, *cgoAllocM
 	var creplica_path_allocs *cgoAllocMap
 	ref81a31e9b.replica_path, creplica_path_allocs = unpackPCharString(x.ReplicaPath)
 	allocs81a31e9b.Borrow(creplica_path_allocs)
+
+	var creplica_in_oss_allocs *cgoAllocMap
+	ref81a31e9b.replica_in_oss, creplica_in_oss_allocs = (C._Bool)(x.ReplicaInOss), cgoAllocsUnknown
+	allocs81a31e9b.Borrow(creplica_in_oss_allocs)
+
+	var creplica_sector_path_info_allocs *cgoAllocMap
+	ref81a31e9b.replica_sector_path_info, creplica_sector_path_info_allocs = x.ReplicaSectorPathInfo.PassValue()
+	allocs81a31e9b.Borrow(creplica_sector_path_info_allocs)
 
 	var csector_id_allocs *cgoAllocMap
 	ref81a31e9b.sector_id, csector_id_allocs = (C.uint64_t)(x.SectorId), cgoAllocsUnknown
@@ -3200,8 +3562,12 @@ func (x *FilPrivateReplicaInfo) Deref() {
 	}
 	x.RegisteredProof = (FilRegisteredPoStProof)(x.ref81a31e9b.registered_proof)
 	x.CacheDirPath = packPCharString(x.ref81a31e9b.cache_dir_path)
+	x.CacheInOss = (bool)(x.ref81a31e9b.cache_in_oss)
+	x.CacheSectorPathInfo = *NewFilPrivateSectorPathInfoRef(unsafe.Pointer(&x.ref81a31e9b.cache_sector_path_info))
 	x.CommR = *(*[32]byte)(unsafe.Pointer(&x.ref81a31e9b.comm_r))
 	x.ReplicaPath = packPCharString(x.ref81a31e9b.replica_path)
+	x.ReplicaInOss = (bool)(x.ref81a31e9b.replica_in_oss)
+	x.ReplicaSectorPathInfo = *NewFilPrivateSectorPathInfoRef(unsafe.Pointer(&x.ref81a31e9b.replica_sector_path_info))
 	x.SectorId = (uint64)(x.ref81a31e9b.sector_id)
 }
 
@@ -5455,236 +5821,6 @@ func (x *FilFinalizeTicketResponse) Deref() {
 	x.StatusCode = (FCPResponseStatus)(x.refb370fa86.status_code)
 	x.ErrorMsg = packPCharString(x.refb370fa86.error_msg)
 	x.Ticket = *(*[32]byte)(unsafe.Pointer(&x.refb370fa86.ticket))
-}
-
-// allocFilGpuDeviceResponseMemory allocates memory for type C.fil_GpuDeviceResponse in C.
-// The caller is responsible for freeing the this memory via C.free.
-func allocFilGpuDeviceResponseMemory(n int) unsafe.Pointer {
-	mem, err := C.calloc(C.size_t(n), (C.size_t)(sizeOfFilGpuDeviceResponseValue))
-	if mem == nil {
-		panic(fmt.Sprintln("memory alloc error: ", err))
-	}
-	return mem
-}
-
-const sizeOfFilGpuDeviceResponseValue = unsafe.Sizeof([1]C.fil_GpuDeviceResponse{})
-
-// allocPCharMemory allocates memory for type *C.char in C.
-// The caller is responsible for freeing the this memory via C.free.
-func allocPCharMemory(n int) unsafe.Pointer {
-	mem, err := C.calloc(C.size_t(n), (C.size_t)(sizeOfPCharValue))
-	if mem == nil {
-		panic(fmt.Sprintln("memory alloc error: ", err))
-	}
-	return mem
-}
-
-const sizeOfPCharValue = unsafe.Sizeof([1]*C.char{})
-
-// unpackSString transforms a sliced Go data structure into plain C format.
-func unpackSString(x []string) (unpacked **C.char, allocs *cgoAllocMap) {
-	if x == nil {
-		return nil, nil
-	}
-	allocs = new(cgoAllocMap)
-	defer runtime.SetFinalizer(allocs, func(a *cgoAllocMap) {
-		go a.Free()
-	})
-
-	len0 := len(x)
-	mem0 := allocPCharMemory(len0)
-	allocs.Add(mem0)
-	h0 := &sliceHeader{
-		Data: mem0,
-		Cap:  len0,
-		Len:  len0,
-	}
-	v0 := *(*[]*C.char)(unsafe.Pointer(h0))
-	for i0 := range x {
-		v0[i0], _ = unpackPCharString(x[i0])
-	}
-	h := (*sliceHeader)(unsafe.Pointer(&v0))
-	unpacked = (**C.char)(h.Data)
-	return
-}
-
-// packSString reads sliced Go data structure out from plain C format.
-func packSString(v []string, ptr0 **C.char) {
-	const m = 0x7fffffff
-	for i0 := range v {
-		ptr1 := (*(*[m / sizeOfPtr]*C.char)(unsafe.Pointer(ptr0)))[i0]
-		v[i0] = packPCharString(ptr1)
-	}
-}
-
-// Ref returns the underlying reference to C object or nil if struct is nil.
-func (x *FilGpuDeviceResponse) Ref() *C.fil_GpuDeviceResponse {
-	if x == nil {
-		return nil
-	}
-	return x.ref58f92915
-}
-
-// Free invokes alloc map's free mechanism that cleanups any allocated memory using C free.
-// Does nothing if struct is nil or has no allocation map.
-func (x *FilGpuDeviceResponse) Free() {
-	if x != nil && x.allocs58f92915 != nil {
-		x.allocs58f92915.(*cgoAllocMap).Free()
-		x.ref58f92915 = nil
-	}
-}
-
-// NewFilGpuDeviceResponseRef creates a new wrapper struct with underlying reference set to the original C object.
-// Returns nil if the provided pointer to C object is nil too.
-func NewFilGpuDeviceResponseRef(ref unsafe.Pointer) *FilGpuDeviceResponse {
-	if ref == nil {
-		return nil
-	}
-	obj := new(FilGpuDeviceResponse)
-	obj.ref58f92915 = (*C.fil_GpuDeviceResponse)(unsafe.Pointer(ref))
-	return obj
-}
-
-// PassRef returns the underlying C object, otherwise it will allocate one and set its values
-// from this wrapping struct, counting allocations into an allocation map.
-func (x *FilGpuDeviceResponse) PassRef() (*C.fil_GpuDeviceResponse, *cgoAllocMap) {
-	if x == nil {
-		return nil, nil
-	} else if x.ref58f92915 != nil {
-		return x.ref58f92915, nil
-	}
-	mem58f92915 := allocFilGpuDeviceResponseMemory(1)
-	ref58f92915 := (*C.fil_GpuDeviceResponse)(mem58f92915)
-	allocs58f92915 := new(cgoAllocMap)
-	allocs58f92915.Add(mem58f92915)
-
-	var cstatus_code_allocs *cgoAllocMap
-	ref58f92915.status_code, cstatus_code_allocs = (C.enum_FCPResponseStatus)(x.StatusCode), cgoAllocsUnknown
-	allocs58f92915.Borrow(cstatus_code_allocs)
-
-	var cerror_msg_allocs *cgoAllocMap
-	ref58f92915.error_msg, cerror_msg_allocs = unpackPCharString(x.ErrorMsg)
-	allocs58f92915.Borrow(cerror_msg_allocs)
-
-	var cdevices_len_allocs *cgoAllocMap
-	ref58f92915.devices_len, cdevices_len_allocs = (C.size_t)(x.DevicesLen), cgoAllocsUnknown
-	allocs58f92915.Borrow(cdevices_len_allocs)
-
-	var cdevices_ptr_allocs *cgoAllocMap
-	ref58f92915.devices_ptr, cdevices_ptr_allocs = unpackSString(x.DevicesPtr)
-	allocs58f92915.Borrow(cdevices_ptr_allocs)
-
-	x.ref58f92915 = ref58f92915
-	x.allocs58f92915 = allocs58f92915
-	return ref58f92915, allocs58f92915
-
-}
-
-// PassValue does the same as PassRef except that it will try to dereference the returned pointer.
-func (x FilGpuDeviceResponse) PassValue() (C.fil_GpuDeviceResponse, *cgoAllocMap) {
-	if x.ref58f92915 != nil {
-		return *x.ref58f92915, nil
-	}
-	ref, allocs := x.PassRef()
-	return *ref, allocs
-}
-
-// Deref uses the underlying reference to C object and fills the wrapping struct with values.
-// Do not forget to call this method whether you get a struct for C object and want to read its values.
-func (x *FilGpuDeviceResponse) Deref() {
-	if x.ref58f92915 == nil {
-		return
-	}
-	x.StatusCode = (FCPResponseStatus)(x.ref58f92915.status_code)
-	x.ErrorMsg = packPCharString(x.ref58f92915.error_msg)
-	x.DevicesLen = (uint)(x.ref58f92915.devices_len)
-	packSString(x.DevicesPtr, x.ref58f92915.devices_ptr)
-}
-
-// allocFilInitLogFdResponseMemory allocates memory for type C.fil_InitLogFdResponse in C.
-// The caller is responsible for freeing the this memory via C.free.
-func allocFilInitLogFdResponseMemory(n int) unsafe.Pointer {
-	mem, err := C.calloc(C.size_t(n), (C.size_t)(sizeOfFilInitLogFdResponseValue))
-	if mem == nil {
-		panic(fmt.Sprintln("memory alloc error: ", err))
-	}
-	return mem
-}
-
-const sizeOfFilInitLogFdResponseValue = unsafe.Sizeof([1]C.fil_InitLogFdResponse{})
-
-// Ref returns the underlying reference to C object or nil if struct is nil.
-func (x *FilInitLogFdResponse) Ref() *C.fil_InitLogFdResponse {
-	if x == nil {
-		return nil
-	}
-	return x.ref3c1a0a08
-}
-
-// Free invokes alloc map's free mechanism that cleanups any allocated memory using C free.
-// Does nothing if struct is nil or has no allocation map.
-func (x *FilInitLogFdResponse) Free() {
-	if x != nil && x.allocs3c1a0a08 != nil {
-		x.allocs3c1a0a08.(*cgoAllocMap).Free()
-		x.ref3c1a0a08 = nil
-	}
-}
-
-// NewFilInitLogFdResponseRef creates a new wrapper struct with underlying reference set to the original C object.
-// Returns nil if the provided pointer to C object is nil too.
-func NewFilInitLogFdResponseRef(ref unsafe.Pointer) *FilInitLogFdResponse {
-	if ref == nil {
-		return nil
-	}
-	obj := new(FilInitLogFdResponse)
-	obj.ref3c1a0a08 = (*C.fil_InitLogFdResponse)(unsafe.Pointer(ref))
-	return obj
-}
-
-// PassRef returns the underlying C object, otherwise it will allocate one and set its values
-// from this wrapping struct, counting allocations into an allocation map.
-func (x *FilInitLogFdResponse) PassRef() (*C.fil_InitLogFdResponse, *cgoAllocMap) {
-	if x == nil {
-		return nil, nil
-	} else if x.ref3c1a0a08 != nil {
-		return x.ref3c1a0a08, nil
-	}
-	mem3c1a0a08 := allocFilInitLogFdResponseMemory(1)
-	ref3c1a0a08 := (*C.fil_InitLogFdResponse)(mem3c1a0a08)
-	allocs3c1a0a08 := new(cgoAllocMap)
-	allocs3c1a0a08.Add(mem3c1a0a08)
-
-	var cstatus_code_allocs *cgoAllocMap
-	ref3c1a0a08.status_code, cstatus_code_allocs = (C.enum_FCPResponseStatus)(x.StatusCode), cgoAllocsUnknown
-	allocs3c1a0a08.Borrow(cstatus_code_allocs)
-
-	var cerror_msg_allocs *cgoAllocMap
-	ref3c1a0a08.error_msg, cerror_msg_allocs = unpackPCharString(x.ErrorMsg)
-	allocs3c1a0a08.Borrow(cerror_msg_allocs)
-
-	x.ref3c1a0a08 = ref3c1a0a08
-	x.allocs3c1a0a08 = allocs3c1a0a08
-	return ref3c1a0a08, allocs3c1a0a08
-
-}
-
-// PassValue does the same as PassRef except that it will try to dereference the returned pointer.
-func (x FilInitLogFdResponse) PassValue() (C.fil_InitLogFdResponse, *cgoAllocMap) {
-	if x.ref3c1a0a08 != nil {
-		return *x.ref3c1a0a08, nil
-	}
-	ref, allocs := x.PassRef()
-	return *ref, allocs
-}
-
-// Deref uses the underlying reference to C object and fills the wrapping struct with values.
-// Do not forget to call this method whether you get a struct for C object and want to read its values.
-func (x *FilInitLogFdResponse) Deref() {
-	if x.ref3c1a0a08 == nil {
-		return
-	}
-	x.StatusCode = (FCPResponseStatus)(x.ref3c1a0a08.status_code)
-	x.ErrorMsg = packPCharString(x.ref3c1a0a08.error_msg)
 }
 
 // copyPSizeTBytes copies the data from Go slice as *C.size_t.
