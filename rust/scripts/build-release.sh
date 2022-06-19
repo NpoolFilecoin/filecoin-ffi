@@ -40,7 +40,7 @@ main() {
 
     RUSTFLAGS="${__rust_flags}" \
         cargo +$2 $3 \
-        --release ${@:4} 2>&1 | tee ${__build_output_log_tmp}
+        --release --locked ${@:4} 2>&1 | tee ${__build_output_log_tmp}
 
     # parse build output for linker flags
     #
@@ -63,6 +63,10 @@ main() {
         echo "Eliminated non-universal binary libraries"
         find . -type f -name "lib$1.a"
     fi
+
+    # generate filcrypto.h
+    RUSTFLAGS="${__rust_flags}" HEADER_DIR="." \
+        cargo test --locked build_headers --features c-headers
 
     # generate pkg-config
     #

@@ -1,12 +1,11 @@
+/*
 use std::{thread, time};
 
 use filecoin_webapi::polling::PollingState;
 use log::{info, trace};
-use reqwest::blocking::Client;
 use serde::ser::Serialize;
 use serde_json::value::from_value;
 use serde_json::{json, Value};
-use std::env;
 
 lazy_static! {
     static ref REQWEST_CLIENT: Client = Client::builder()
@@ -67,3 +66,4 @@ macro_rules! webapi_post_polling {
         crate::util::rpc::webapi_post_polling($path, $json);
     };
 }
+*/

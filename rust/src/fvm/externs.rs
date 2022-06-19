@@ -3,7 +3,6 @@ use fvm::externs::{Consensus, Externs, Rand};
 use fvm_shared::address::Address;
 use fvm_shared::clock::ChainEpoch;
 use fvm_shared::consensus::ConsensusFault;
-use fvm_shared::crypto::randomness::DomainSeparationTag;
 use num_traits::FromPrimitive;
 
 use super::cgo::*;
@@ -27,7 +26,7 @@ impl CgoExterns {
 impl Rand for CgoExterns {
     fn get_chain_randomness(
         &self,
-        pers: DomainSeparationTag,
+        pers: i64,
         round: ChainEpoch,
         entropy: &[u8],
     ) -> anyhow::Result<[u8; 32]> {
@@ -43,7 +42,9 @@ impl Rand for CgoExterns {
             ) {
                 0 => Ok(buf),
                 r @ 1.. => panic!("invalid return value from has: {}", r),
-                ERR_INVALID_HANDLE => panic!("extern {} not registered", self.handle),
+                x if x == FvmError::InvalidHandle as i32 => {
+                    panic!("extern {} not registered", self.handle)
+                }
                 e => Err(anyhow!(
                     "cgo extern 'get_chain_randomness' failed with error code {}",
                     e
@@ -54,7 +55,7 @@ impl Rand for CgoExterns {
 
     fn get_beacon_randomness(
         &self,
-        pers: DomainSeparationTag,
+        pers: i64,
         round: ChainEpoch,
         entropy: &[u8],
     ) -> anyhow::Result<[u8; 32]> {
@@ -70,7 +71,9 @@ impl Rand for CgoExterns {
             ) {
                 0 => Ok(buf),
                 r @ 1.. => panic!("invalid return value from has: {}", r),
-                ERR_INVALID_HANDLE => panic!("extern {} not registered", self.handle),
+                x if x == FvmError::InvalidHandle as i32 => {
+                    panic!("extern {} not registered", self.handle)
+                }
                 e => Err(anyhow!(
                     "cgo extern 'get_beacon_randomness' failed with error code {}",
                     e
@@ -118,7 +121,9 @@ impl Consensus for CgoExterns {
                     gas_used,
                 )),
                 r @ 1.. => panic!("invalid return value from has: {}", r),
-                ERR_INVALID_HANDLE => panic!("extern {} not registered", self.handle),
+                x if x == FvmError::InvalidHandle as i32 => {
+                    panic!("extern {} not registered", self.handle)
+                }
                 e => Err(anyhow!(
                     "cgo extern 'verify_consensus_fault' failed with error code {}",
                     e

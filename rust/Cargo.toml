@@ -1,86 +1,88 @@
 [package]
-name = "filcrypto"
-description = "FFI Interface to Filecoin Proofs"
-version = "0.7.5"
 authors = [
   "nemo <nemo@protocol.ai>",
   "dignifiedquire <me@dignifiedquire.com>",
   "laser <l@s3r.com>",
 ]
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/EntropyPool/filecoin-ffi"
-readme = "README.md"
+description = "FFI Interface to Filecoin Proofs"
 edition = "2021"
-resolver = "2"
+license = "MIT OR Apache-2.0"
+name = "filcrypto"
 publish = false
+readme = "README.md"
+repository = "https://github.com/EntropyPool/filecoin-ffi"
+resolver = "2"
+version = "0.7.5"
 
 [lib]
 crate-type = ["rlib", "staticlib"]
 
 [dependencies]
-bls-signatures = { version = "0.11.0", default-features = false, features = [
+actors-v7 = {package = "fil_builtin_actors_bundle", version = "~7.5.1"}
+anyhow = "1.0.23"
+bellperson = {version = "0.21", default-features = false}
+bls-signatures = {version = "0.11.0", default-features = false, features = [
   "blst",
-] }
+]}
 blstrs = "0.4"
 byteorder = "1.2"
-drop_struct_macro_derive = "0.5.0"
-ff = { version = "0.3.1", package = "fff" }
-ffi-toolkit = "0.5.0"
+cid = {version = "0.8.3", features = ["serde-codec"]}
+ff = {version = "0.3.1", package = "fff"}
+fil_logger = "0.1.0"
 filepath = "0.1.1"
+fr32 = {version = "~4.1", default-features = false}
+futures = "0.3.5"
+fvm = {version = "1.0.0-rc.3", default-features = false}
+fvm_ipld_blockstore = "0.1.1"
+fvm_ipld_car = "0.4.1"
+fvm_ipld_encoding = "0.2.2"
+fvm_shared = "0.8.0"
 group = "0.11"
+lazy_static = "1.4.0"
 libc = "0.2.58"
 log = "0.4.7"
-fil_logger = "0.1.0"
+memmap = "0.7"
+num-bigint = "0.4"
+num-traits = "0.2.14"
+once_cell = "1.9.0"
 rand = "0.8"
 rand_chacha = "0.3.1"
 rayon = "1.2.1"
-anyhow = "1.0.23"
-bellperson = { version = "0.18", default-features = false }
-serde_json = "1.0.46"
-memmap = "0.7"
-rust-gpu-tools = { version = "0.5", default-features = false }
-storage-proofs-porep = { version = "~11.0", default-features = false }
-fr32 = { version = "~4.0", default-features = false }
-fvm = { version = "0.5.1", default-features = false }
-fvm_ipld_car = "0.4.0"
-fvm_shared = "0.4.1"
-fvm_ipld_blockstore = "0.1.0"
-fvm_ipld_encoding = "0.1.0"
-actors-v6 = { package = "fil_builtin_actors_bundle", version = "6.1.1" }
-actors-v7 = { package = "fil_builtin_actors_bundle", version = "7.1.1" }
-num-traits = "0.2.14"
-num-bigint = "0.4"
-cid = { version = "0.8.3", features = ["serde-codec"] }
-lazy_static = "1.4.0"
-once_cell = "1.9.0"
+reqwest = {version = "0.11.9", features = ["blocking", "json"]}
+rust-gpu-tools = {version = "0.5", default-features = false}
+safer-ffi = {version = "0.0.7", features = ["proc_macros"]}
 serde = "1.0.117"
 serde_bytes = "0.11.5"
+serde_json = "1.0.46"
 serde_tuple = "0.5"
-futures = "0.3.5"
+storage-proofs-porep = {version = "~11.1", default-features = false}
 
-# here must use special version
-async-global-executor = "= 2.0.4"
-
-filecoin-proofs-api = { path = "../../rust-filecoin-proofs-api", version = "11.0", default-features = false }
-filecoin-webapi = { path = "../../filecoin-webapi", default-features = false }
-reqwest = { version = "0.11.9", features = ["blocking", "json"] }
-
-[build-dependencies]
-cbindgen = "= 0.20.0"
+filecoin-proofs-api = {path = "../../rust-filecoin-proofs-api", version = "11.1", default-features = false}
+filecoin-webapi = {path = "../../filecoin-webapi", default-features = false}
 
 [dev-dependencies]
 tempfile = "3.0.8"
 
+[patch.crates-io]
+bellperson = {path = "../../bellperson", default-features = false, features = [
+  "opencl",
+]}
+filecoin-hashers = {path = "../../rust-fil-proofs/filecoin-hashers", default-features = false}
+filecoin-proofs = {path = "../../rust-fil-proofs/filecoin-proofs", default-features = false}
+filecoin-proofs-api = {path = "../../rust-filecoin-proofs-api", default-features = false}
+fr32 = {path = "../../rust-fil-proofs/fr32", default-features = false}
+merkletree = {path = "../../merkletree"}
+sha2raw = {path = "../../rust-fil-proofs/sha2raw"}
+storage-proofs-core = {path = "../../rust-fil-proofs/storage-proofs-core"}
+storage-proofs-porep = {path = "../../rust-fil-proofs/storage-proofs-porep"}
+storage-proofs-post = {path = "../../rust-fil-proofs/storage-proofs-post"}
+storage-proofs-update = {path = "../../rust-fil-proofs/storage-proofs-update"}
+
+wasmtime = {git = "https://github.com/filecoin-project/wasmtime", branch = "fix/sse-feature"}
+
 [features]
-default = ["opencl", "multicore-sdr"]
 blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
-opencl = [
-  "filecoin-proofs-api/opencl",
-  "bellperson/opencl",
-  "storage-proofs-porep/opencl",
-  "rust-gpu-tools/opencl",
-  "fvm/opencl",
-]
+c-headers = ["safer-ffi/headers"]
 cuda = [
   "filecoin-proofs-api/cuda",
   "bellperson/cuda",
@@ -88,23 +90,12 @@ cuda = [
   "rust-gpu-tools/cuda",
   "fvm/cuda",
 ]
+default = ["opencl", "multicore-sdr"]
 multicore-sdr = ["storage-proofs-porep/multicore-sdr"]
-
-# Only enabled by cbindgen. When enabled, the cgo_* externs are disabled so as not to confuse
-# cbindgen.
-bindgen = []
-
-[patch.crates-io]
-bellperson = { path = "../../bellperson", default-features = false, features = [
-  "opencl",
-] }
-filecoin-hashers = { path = "../../rust-fil-proofs/filecoin-hashers", default-features = false }
-filecoin-proofs = { path = "../../rust-fil-proofs/filecoin-proofs", default-features = false }
-filecoin-proofs-api = { path = "../../rust-filecoin-proofs-api", default-features = false }
-fr32 = { path = "../../rust-fil-proofs/fr32", default-features = false }
-merkletree = { path = "../../merkletree" }
-sha2raw = { path = "../../rust-fil-proofs/sha2raw" }
-storage-proofs-core = { path = "../../rust-fil-proofs/storage-proofs-core" }
-storage-proofs-porep = { path = "../../rust-fil-proofs/storage-proofs-porep" }
-storage-proofs-post = { path = "../../rust-fil-proofs/storage-proofs-post" }
-storage-proofs-update = { path = "../../rust-fil-proofs/storage-proofs-update" }
+opencl = [
+  "filecoin-proofs-api/opencl",
+  "bellperson/opencl",
+  "storage-proofs-porep/opencl",
+  "rust-gpu-tools/opencl",
+  "fvm/opencl",
+]
