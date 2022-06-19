@@ -27,7 +27,7 @@ type PrivateReplicaInfo = C.PrivateReplicaInfo_t
 type PartitionSnarkProof = C.PartitionSnarkProof_t
 type PoStProof = C.PoStProof_t
 type PublicPieceInfo = C.PublicPieceInfo_t
-type PrivateSectorPathInfo = c.PrivateSectorPathInfo_t
+type PrivateSectorPathInfo = C.PrivateSectorPathInfo_t
 
 type SliceRefPublicReplicaInfo = C.slice_ref_PublicReplicaInfo_t
 type SliceRefPrivateReplicaInfo = C.slice_ref_PrivateReplicaInfo_t

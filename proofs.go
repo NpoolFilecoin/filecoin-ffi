@@ -317,6 +317,7 @@ func SealPreCommitPhase1(
 		&proverID,
 		&ticketBytes,
 		cgo.AsSliceRefPublicPieceInfo(filPublicPieceInfos),
+		cgo.AsBool(hasDeals),
 	)
 }
 
