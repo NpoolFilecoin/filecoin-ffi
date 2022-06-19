@@ -20,7 +20,6 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/xerrors"
 
-	"github.com/filecoin-project/filecoin-ffi/generated"
 	"github.com/filecoin-project/go-address"
 	commcid "github.com/filecoin-project/go-fil-commcid"
 	"github.com/filecoin-project/go-state-types/abi"
@@ -1051,7 +1050,7 @@ func InitLog() {
 		fmt.Printf("CANNOT open FFI log file %v: %v\n", file, err)
 		return
 	}
-	generated.FilInitLogFd(int32(filLogFile.Fd()))
+	cgo.InitLogFd(int32(filLogFile.Fd()))
 	// syscall.Dup2(int(filLogFile.Fd()), 1)
 	// syscall.Dup2(int(filLogFile.Fd()), 2)
 }
