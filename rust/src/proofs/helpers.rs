@@ -9,12 +9,10 @@ use filecoin_proofs_api::{
 };
 use safer_ffi::prelude::*;
 
-use crate::util::types::{
-    as_path_buf,
-};
+use crate::util::types::as_path_buf;
 
 use super::types::{
-    PrivateReplicaInfo, PrivateSectorPathInfo, PublicReplicaInfo, RegisteredPoStProof,
+    PrivateReplicaInfo, PrivateReplicaInfoTmp, PublicReplicaInfo, RegisteredPoStProof,
 };
 
 #[derive(Debug, Clone)]
@@ -53,19 +51,6 @@ pub fn to_public_replica_info_map(
             )
         })
         .collect()
-}
-
-#[derive(Debug)]
-struct PrivateReplicaInfoTmp {
-    pub registered_proof: RegisteredPoStProof,
-    pub cache_dir_path: std::path::PathBuf,
-    pub cache_in_oss: bool,
-    pub cache_sector_path_info: PrivateSectorPathInfo,
-    pub comm_r: [u8; 32],
-    pub replica_path: std::path::PathBuf,
-    pub replica_in_oss: bool,
-    pub replica_sector_path_info: PrivateSectorPathInfo,
-    pub sector_id: u64,
 }
 
 pub fn to_private_replica_info_map(

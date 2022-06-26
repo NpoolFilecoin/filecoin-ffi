@@ -3,8 +3,8 @@ use std::fs;
 use blstrs::Scalar as Fr;
 use filecoin_proofs_api::seal;
 use filecoin_proofs_api::{
-    self as api, update, PieceInfo, SectorId, StorageProofsError, UnpaddedByteIndex,
-    UnpaddedBytesAmount,
+    self as api, update, PieceInfo, PrivateSectorPathInfo as api_PrivateSectorPathInfo, SectorId,
+    StorageProofsError, UnpaddedByteIndex, UnpaddedBytesAmount,
 };
 use rayon::prelude::*;
 use safer_ffi::prelude::*;
@@ -451,20 +451,65 @@ fn generate_single_vanilla_proof(
     challenges: c_slice::Ref<u64>,
 ) -> repr_c::Box<GenerateSingleVanillaProofResponse> {
     catch_panic_response("generate_single_vanilla_proof", || {
-        let sector_id = SectorId::from(replica.sector_id);
-        let cache_dir_path = as_path_buf(&replica.cache_dir_path)?;
-        let replica_path = as_path_buf(&replica.replica_path)?;
+        // let replica_v1 = api::PrivateReplicaInfo::new(
+        //     replica.registered_proof.into(),
+        //     replica.comm_r,
+        //     cache_dir_path,
+        //     replica_path,
+        // );
 
-        let replica_v1 = api::PrivateReplicaInfo::new(
-            replica.registered_proof.into(),
-            replica.comm_r,
+        let PrivateReplicaInfo {
+            registered_proof,
             cache_dir_path,
+            cache_in_oss,
+            cache_sector_path_info,
+            comm_r,
             replica_path,
+            replica_in_oss,
+            replica_sector_path_info,
+            sector_id,
+        } = replica;
+
+        let sector_id = SectorId::from(sector_id);
+        let cache_dir_path = as_path_buf(&cache_dir_path)?;
+        let replica_path = as_path_buf(&replica_path)?;
+
+        let api_replica_sector_path_info = api_PrivateSectorPathInfo {
+            endpoints: String::from_utf8(replica_sector_path_info.endpoints.to_vec()).unwrap(),
+            landed_dir: as_path_buf(&replica_sector_path_info.landed_dir).unwrap(),
+            access_key: String::from_utf8(replica_sector_path_info.access_key.to_vec()).unwrap(),
+            secret_key: String::from_utf8(replica_sector_path_info.secret_key.to_vec()).unwrap(),
+            bucket_name: String::from_utf8(replica_sector_path_info.bucket_name.to_vec()).unwrap(),
+            sector_name: String::from_utf8(replica_sector_path_info.sector_name.to_vec()).unwrap(),
+            region: String::from_utf8(replica_sector_path_info.region.to_vec()).unwrap(),
+            multi_ranges: replica_sector_path_info.multi_ranges,
+        };
+
+        let api_cache_sector_path_info = api_PrivateSectorPathInfo {
+            endpoints: String::from_utf8(cache_sector_path_info.endpoints.to_vec()).unwrap(),
+            landed_dir: as_path_buf(&cache_sector_path_info.landed_dir).unwrap(),
+            access_key: String::from_utf8(cache_sector_path_info.access_key.to_vec()).unwrap(),
+            secret_key: String::from_utf8(cache_sector_path_info.secret_key.to_vec()).unwrap(),
+            bucket_name: String::from_utf8(cache_sector_path_info.bucket_name.to_vec()).unwrap(),
+            sector_name: String::from_utf8(cache_sector_path_info.sector_name.to_vec()).unwrap(),
+            region: String::from_utf8(cache_sector_path_info.region.to_vec()).unwrap(),
+            multi_ranges: cache_sector_path_info.multi_ranges,
+        };
+
+        let replica_v1 = api::PrivateReplicaInfo::new_with_oss_config(
+            registered_proof.into(),
+            replica_path,
+            replica_in_oss,
+            api_replica_sector_path_info,
+            comm_r,
+            cache_dir_path,
+            cache_in_oss,
+            api_cache_sector_path_info,
         );
 
         let result = filecoin_proofs_api::post::generate_single_vanilla_proof(
             replica.registered_proof.into(),
-            sector_id,
+            SectorId::from(replica.sector_id),
             &replica_v1,
             &*challenges,
         )?;

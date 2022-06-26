@@ -406,6 +406,19 @@ pub type FauxRepResponse = Result<[u8; 32]>;
 
 pub type SealPreCommitPhase2Response = Result<SealPreCommitPhase2>;
 
+#[derive(Debug)]
+pub struct PrivateReplicaInfoTmp {
+    pub registered_proof: RegisteredPoStProof,
+    pub cache_dir_path: std::path::PathBuf,
+    pub cache_in_oss: bool,
+    pub cache_sector_path_info: PrivateSectorPathInfo,
+    pub comm_r: [u8; 32],
+    pub replica_path: std::path::PathBuf,
+    pub replica_in_oss: bool,
+    pub replica_sector_path_info: PrivateSectorPathInfo,
+    pub sector_id: u64,
+}
+
 #[derive_ReprC]
 #[repr(C)]
 pub struct SealPreCommitPhase2 {
