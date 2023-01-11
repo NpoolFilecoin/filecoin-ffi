@@ -1,9 +1,8 @@
 use std::io::SeekFrom;
 
+use crate::util::types::Result;
 use filecoin_proofs_api as api;
 use safer_ffi::prelude::*;
-
-use crate::util::types::Result;
 
 /// FileDescriptorRef does not drop its file descriptor when it is dropped. Its
 /// owner must manage the lifecycle of the file descriptor.
@@ -304,12 +303,30 @@ pub type ApiPartitionProof = c_slice::Box<u8>;
 
 #[derive_ReprC]
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
+pub struct PrivateSectorPathInfo {
+    pub endpoints: c_slice::Box<u8>, // split by comma(,)
+    pub access_key: c_slice::Box<u8>,
+    pub secret_key: c_slice::Box<u8>,
+    pub bucket_name: c_slice::Box<u8>,
+    pub landed_dir: c_slice::Box<u8>,
+    pub sector_name: c_slice::Box<u8>,
+    pub region: c_slice::Box<u8>,
+    pub multi_ranges: bool,
+}
+
+#[derive_ReprC]
+#[repr(C)]
+#[derive(Debug, Clone)]
 pub struct PrivateReplicaInfo {
     pub registered_proof: RegisteredPoStProof,
     pub cache_dir_path: c_slice::Box<u8>,
+    pub cache_in_oss: bool,
+    pub cache_sector_path_info: PrivateSectorPathInfo,
     pub comm_r: [u8; 32],
     pub replica_path: c_slice::Box<u8>,
+    pub replica_in_oss: bool,
+    pub replica_sector_path_info: PrivateSectorPathInfo,
     pub sector_id: u64,
 }
 
@@ -388,6 +405,19 @@ pub type SealPreCommitPhase1Response = Result<c_slice::Box<u8>>;
 pub type FauxRepResponse = Result<[u8; 32]>;
 
 pub type SealPreCommitPhase2Response = Result<SealPreCommitPhase2>;
+
+#[derive(Debug)]
+pub struct PrivateReplicaInfoTmp {
+    pub registered_proof: RegisteredPoStProof,
+    pub cache_dir_path: std::path::PathBuf,
+    pub cache_in_oss: bool,
+    pub cache_sector_path_info: PrivateSectorPathInfo,
+    pub comm_r: [u8; 32],
+    pub replica_path: std::path::PathBuf,
+    pub replica_in_oss: bool,
+    pub replica_sector_path_info: PrivateSectorPathInfo,
+    pub sector_id: u64,
+}
 
 #[derive_ReprC]
 #[repr(C)]
