@@ -1,5 +1,8 @@
 use std::fs::File;
-use std::os::unix::io::FromRawFd;
+use std::fs::OpenOptions;
+use std::path::PathBuf;
+
+// use std::os::unix::io::FromRawFd;
 use std::sync::Once;
 
 use anyhow::anyhow;
@@ -7,7 +10,7 @@ use safer_ffi::prelude::*;
 use safer_ffi::slice::slice_boxed;
 
 use super::types::{
-    catch_panic_response, catch_panic_response_no_log, GpuDeviceResponse, InitLogFdResponse,
+    catch_panic_response, GpuDeviceResponse, InitLogFdResponse,
 };
 
 /// Protects the init off the logger.
@@ -15,9 +18,9 @@ static LOG_INIT: Once = Once::new();
 
 /// Ensures the logger is initialized.
 pub fn init_log() {
-    LOG_INIT.call_once(|| {
-        fil_logger::init();
-    });
+    // LOG_INIT.call_once(|| {
+    //     fil_logger::init();
+    // });
 }
 /// Initialize the logger with a file to log into
 ///
@@ -67,10 +70,19 @@ pub fn get_gpu_devices() -> repr_c::Box<GpuDeviceResponse> {
 /// This function must be called right at the start, before any other call. Else the logger will
 /// be initializes implicitely and log to stderr.
 #[ffi_export]
-pub fn init_log_fd(log_fd: libc::c_int) -> repr_c::Box<InitLogFdResponse> {
-    catch_panic_response_no_log(|| {
-        let file = unsafe { File::from_raw_fd(log_fd) };
-
+pub fn init_log_fd(log_fd: libc::c_int) -> repr_c::Box<InitLogFdResponse>  {
+    catch_panic_response("init_log_fd",|| {
+        // let file = File::from_raw_fd(log_fd);
+        let log_file_path = match std::env::var("GOLOG_FILE") {
+            Ok(file_path) => {
+                let mut path = PathBuf::from(file_path);
+                path.set_file_name("rust-".to_owned() + &path.file_name().unwrap().to_os_string().into_string().unwrap());
+                path
+            },
+            Err(_) => PathBuf::from("/var/log/lotus/rust-log.log"),
+        };
+        let file = OpenOptions::new().read(true).write(true).create(true).open(log_file_path).unwrap();
+        let mut response = InitLogFdResponse::default();
         if init_log_with_file(file).is_none() {
             return Err(anyhow!("There is already an active logger. `init_log_fd()` needs to be called before any other FFI function is called."));
         }

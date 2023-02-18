@@ -1,24 +1,26 @@
 [package]
-name = "filcrypto"
-description = "FFI Interface to Filecoin Proofs"
-version = "0.7.5"
 authors = [
   "nemo <nemo@protocol.ai>",
   "dignifiedquire <me@dignifiedquire.com>",
-  "laser <l@s3r.com>"
+  "laser <l@s3r.com>",
 ]
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/filecoin-project/filecoin-ffi"
-readme = "README.md"
+description = "FFI Interface to Filecoin Proofs"
 edition = "2021"
-resolver = "2"
+license = "MIT OR Apache-2.0"
+name = "filcrypto"
 publish = false
+readme = "README.md"
+repository = "https://github.com/EntropyPool/filecoin-ffi"
+resolver = "2"
+version = "0.7.5"
 
 [lib]
 crate-type = ["rlib", "staticlib"]
 
 [dependencies]
-bls-signatures = { version = "0.12.0", default-features = false, features = ["blst"] }
+bls-signatures = { version = "0.12.0", default-features = false, features = [
+  "blst",
+] }
 blstrs = "0.5"
 byteorder = "1.4.3"
 filepath = "0.1.1"
@@ -46,18 +48,30 @@ cid = { version = "0.8.5", features = ["serde-codec"] }
 lazy_static = "1.4.0"
 serde = "1.0.117"
 serde_tuple = "0.5"
-safer-ffi = { version = "0.0.7", features = ["proc_macros"] }
 
-[dependencies.filecoin-proofs-api]
-package = "filecoin-proofs-api"
-version = "12.0"
-default-features = false
+filecoin-proofs-api = { path = "../../rust-filecoin-proofs-api", version = "12.0", default-features = false }
+filecoin-webapi = { path = "../../filecoin-webapi", default-features = false }
+safer-ffi = { version = "0.0.7", features = ["proc_macros"] }
 
 [dev-dependencies]
 tempfile = "3.0.8"
 
+[patch.crates-io]
+filecoin-hashers = { path = "../../rust-fil-proofs/filecoin-hashers", default-features = false }
+filecoin-proofs = { path = "../../rust-fil-proofs/filecoin-proofs", default-features = false }
+filecoin-proofs-api = { path = "../../rust-filecoin-proofs-api", default-features = false }
+fr32 = { path = "../../rust-fil-proofs/fr32", default-features = false }
+merkletree = { path = "../../merkletree" }
+sha2raw = { path = "../../rust-fil-proofs/sha2raw" }
+storage-proofs-core = { path = "../../rust-fil-proofs/storage-proofs-core" }
+storage-proofs-porep = { path = "../../rust-fil-proofs/storage-proofs-porep" }
+storage-proofs-post = { path = "../../rust-fil-proofs/storage-proofs-post" }
+storage-proofs-update = { path = "../../rust-fil-proofs/storage-proofs-update" }
+
+wasmtime = { git = "https://github.com/filecoin-project/wasmtime", branch = "fix/sse-feature" }
+
 [features]
-default = ["opencl", "multicore-sdr" ]
+default = ["opencl", "multicore-sdr"]
 blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
 opencl = ["filecoin-proofs-api/opencl", "rust-gpu-tools/opencl", "fvm3/opencl", "fvm2/opencl"]
 cuda = ["filecoin-proofs-api/cuda", "rust-gpu-tools/cuda", "fvm3/cuda", "fvm2/cuda"]
