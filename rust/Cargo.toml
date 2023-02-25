@@ -62,6 +62,7 @@ filecoin-proofs = { path = "../../rust-fil-proofs/filecoin-proofs", default-feat
 filecoin-proofs-api = { path = "../../rust-filecoin-proofs-api", default-features = false }
 fr32 = { path = "../../rust-fil-proofs/fr32", default-features = false }
 merkletree = { path = "../../merkletree" }
+bellperson = { path = "../../bellperson", version = "0.22", default-features = false }
 sha2raw = { path = "../../rust-fil-proofs/sha2raw" }
 storage-proofs-core = { path = "../../rust-fil-proofs/storage-proofs-core" }
 storage-proofs-porep = { path = "../../rust-fil-proofs/storage-proofs-porep" }
