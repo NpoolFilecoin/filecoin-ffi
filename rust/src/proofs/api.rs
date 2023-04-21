@@ -2347,10 +2347,32 @@ pub mod tests {
             // Generate a legacy WindowPoSt for later use.
             let legacy_registered_proof_window_post = RegisteredPoStProof::StackedDrgWindow2KiBV1;
             let legacy_private_replicas = vec![PrivateReplicaInfo {
-                registered_proof: legacy_registered_proof_window_post,
+                registered_proof: registered_proof_window_post,
                 cache_dir_path: cache_dir_path_ref.to_vec().into_boxed_slice().into(),
+                cache_in_oss: false,
+                cache_sector_path_info: PrivateSectorPathInfo {
+                    endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    multi_ranges: false,
+                },
                 comm_r: resp_b2.comm_r,
                 replica_path: sealed_path_ref.to_vec().into_boxed_slice().into(),
+                replica_in_oss: false,
+                replica_sector_path_info: PrivateSectorPathInfo {
+                    endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    multi_ranges: false,
+                },
                 sector_id,
             }];
 

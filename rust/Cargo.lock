@@ -825,8 +825,6 @@ checksum = "a4a4ddaa51a5bc52a6948f74c06d20aaaddb71924eab79b8c97a8c556e942d6a"
 [[package]]
 name = "bellperson"
 version = "0.24.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1a8623f815c0b1fd89efd9b5f4afbb937f91f51c1ebe3f6dda399c69fa938f3"
 dependencies = [
  "bincode",
  "blake2s_simd 1.0.1",
@@ -845,6 +843,7 @@ dependencies = [
  "rand 0.8.5",
  "rand_core 0.6.4",
  "rayon",
+ "rust-gpu-tools",
  "rustversion",
  "serde",
  "sha2 0.10.6",
@@ -1784,14 +1783,10 @@ dependencies = [
 [[package]]
 name = "ec-gpu"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd63582de2b59ea1aa48d7c1941b5d87618d95484397521b3acdfa0e1e9f5e45"
 
 [[package]]
 name = "ec-gpu-gen"
 version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd09bf9d5313ad60379f70250590bccc10f7a04e2773062ac13255a37022584e"
 dependencies = [
  "bitvec",
  "crossbeam-channel",
@@ -1800,6 +1795,7 @@ dependencies = [
  "ff",
  "group",
  "hex",
+ "lazy_static",
  "log",
  "num_cpus",
  "once_cell",
@@ -2043,7 +2039,7 @@ dependencies = [
  "generic-array",
  "hex",
  "lazy_static",
- "merkletree",
+ "merkletree 0.22.1",
  "neptune",
  "rand 0.8.5",
  "serde",
@@ -2053,8 +2049,6 @@ dependencies = [
 [[package]]
 name = "filecoin-hashers"
 version = "9.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66d7e656d4f01d7772ef2dd0f59854c8f904370a946053cf37ef420c854d9a35"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -2063,7 +2057,7 @@ dependencies = [
  "generic-array",
  "hex",
  "lazy_static",
- "merkletree",
+ "merkletree 0.23.0",
  "neptune",
  "rand 0.8.5",
  "serde",
@@ -2088,7 +2082,7 @@ dependencies = [
  "lazy_static",
  "log",
  "memmap2",
- "merkletree",
+ "merkletree 0.22.1",
  "once_cell",
  "rand 0.8.5",
  "rayon",
@@ -2105,8 +2099,6 @@ dependencies = [
 [[package]]
 name = "filecoin-proofs"
 version = "14.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e00449c0e89be0922127e7e927e578247825450abdaf0da2fc30b733cb0e535b"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -2115,15 +2107,18 @@ dependencies = [
  "blstrs",
  "filecoin-hashers 9.0.0",
  "fr32 7.0.0",
+ "fs2",
  "generic-array",
  "hex",
  "lazy_static",
+ "libc",
  "log",
  "memmap2",
- "merkletree",
+ "merkletree 0.23.0",
  "once_cell",
  "rand 0.8.5",
  "rayon",
+ "rust-s3",
  "serde",
  "serde_json",
  "sha2 0.10.6",
@@ -2131,6 +2126,7 @@ dependencies = [
  "storage-proofs-porep 14.0.0",
  "storage-proofs-post 14.0.0",
  "storage-proofs-update 14.0.0",
+ "tokio 0.2.25",
  "typenum",
 ]
 
@@ -2164,8 +2160,10 @@ dependencies = [
  "filecoin-proofs 14.0.0",
  "fr32 7.0.0",
  "lazy_static",
+ "log",
  "serde",
  "storage-proofs-core 14.0.0",
+ "storage-proofs-porep 14.0.0",
 ]
 
 [[package]]
@@ -2291,8 +2289,6 @@ dependencies = [
 [[package]]
 name = "fr32"
 version = "7.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4f07b8a600b8c699f8ddc5f520231bc2aac03e944c64055eccfd9a959c3fd60"
 dependencies = [
  "anyhow",
  "blstrs",
@@ -3531,13 +3527,30 @@ dependencies = [
 
 [[package]]
 name = "merkletree"
-version = "0.22.0"
+version = "0.22.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d348b5b0d1707be1c8a727b7078daa08e2a3051d63b35715a19c35a324d2aaac"
+dependencies = [
+ "anyhow",
+ "arrayref",
+ "log",
+ "memmap2",
+ "positioned-io 0.3.1",
+ "rayon",
+ "serde",
+ "tempfile",
+ "typenum",
+]
+
+[[package]]
+name = "merkletree"
+version = "0.23.0"
 dependencies = [
  "anyhow",
  "arrayref",
  "log",
  "memmap",
- "positioned-io",
+ "positioned-io 0.2.2",
  "rand 0.7.3",
  "rayon",
  "rust-s3",
@@ -4145,6 +4158,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "positioned-io"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09b9485cf7f528baf34edd811ec8283a168864912e11d0b7d3e0510738761114"
+dependencies = [
+ "byteorder 1.4.3",
+ "libc",
+ "winapi 0.3.9",
+]
+
+[[package]]
 name = "ppv-lite86"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4423,9 +4447,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.8.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac6cf59af1067a3fb53fbe5c88c053764e930f932be1d71d3ffe032cbe147f59"
+checksum = "af83e617f331cc6ae2da5443c602dfa5af81e517212d9d611a5b3ba1777b5370"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -4434,9 +4458,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6868896879ba532248f33598de5181522d8b3d9d724dfd230911e1a7d4822f5"
+checksum = "a5996294f19bd3aae0453a862ad728f60e6600695733dd5df01da90c54363a3c"
 
 [[package]]
 name = "remove_dir_all"
@@ -4979,8 +5003,6 @@ dependencies = [
 [[package]]
 name = "sha2raw"
 version = "9.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1ec45c74ebb91d25e61e14cfc1925e7571723ae14a38fc6c8bd0b2e516db101"
 dependencies = [
  "byteorder 1.4.3",
  "cpufeatures",
@@ -5160,7 +5182,7 @@ dependencies = [
  "lazy_static",
  "log",
  "memmap2",
- "merkletree",
+ "merkletree 0.22.1",
  "num_cpus",
  "rand 0.8.5",
  "rand_chacha 0.3.1",
@@ -5175,8 +5197,6 @@ dependencies = [
 [[package]]
 name = "storage-proofs-core"
 version = "14.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f756ef2dd06efda2eb30bf6806399d493072d8469b0a724f1905dc051fea59c1"
 dependencies = [
  "aes",
  "anyhow",
@@ -5195,7 +5215,7 @@ dependencies = [
  "lazy_static",
  "log",
  "memmap2",
- "merkletree",
+ "merkletree 0.23.0",
  "num_cpus",
  "rand 0.8.5",
  "rand_chacha 0.3.1",
@@ -5230,7 +5250,7 @@ dependencies = [
  "libc",
  "log",
  "memmap2",
- "merkletree",
+ "merkletree 0.22.1",
  "neptune",
  "num-bigint",
  "num-traits",
@@ -5248,8 +5268,6 @@ dependencies = [
 [[package]]
 name = "storage-proofs-porep"
 version = "14.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2450a62eb009602a4a4d697a027ab1025657cd76b325a99dfeb8d263d44b1c5c"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -5257,7 +5275,9 @@ dependencies = [
  "blstrs",
  "byte-slice-cast",
  "byteorder 1.4.3",
+ "chrono",
  "crossbeam",
+ "errno 0.2.8",
  "fdlimit",
  "ff",
  "filecoin-hashers 9.0.0",
@@ -5269,13 +5289,14 @@ dependencies = [
  "libc",
  "log",
  "memmap2",
- "merkletree",
+ "merkletree 0.23.0",
  "neptune",
  "num-bigint",
  "num-traits",
  "num_cpus",
  "pretty_assertions",
  "rayon",
+ "rust-gpu-tools",
  "rustversion",
  "serde",
  "serde_json",
@@ -5311,8 +5332,6 @@ dependencies = [
 [[package]]
 name = "storage-proofs-post"
 version = "14.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51e034a55f3c5137120c4cd1abb717cd397c660447c4393c2550be3ee5b070c4"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -5347,7 +5366,7 @@ dependencies = [
  "lazy_static",
  "log",
  "memmap2",
- "merkletree",
+ "merkletree 0.22.1",
  "neptune",
  "rayon",
  "serde",
@@ -5358,8 +5377,6 @@ dependencies = [
 [[package]]
 name = "storage-proofs-update"
 version = "14.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3433b2832153e2744bfa87176dcb0b587392b57fd1bd770804d366c98822285a"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -5371,7 +5388,7 @@ dependencies = [
  "lazy_static",
  "log",
  "memmap2",
- "merkletree",
+ "merkletree 0.23.0",
  "neptune",
  "rayon",
  "serde",
@@ -6527,50 +6544,6 @@ dependencies = [
  "quote",
  "syn 2.0.15",
 ]
-
-[[patch.unused]]
-name = "bellperson"
-version = "0.22.1"
-
-[[patch.unused]]
-name = "ec-gpu"
-version = "0.1.0"
-
-[[patch.unused]]
-name = "ec-gpu-gen"
-version = "0.3.1"
-
-[[patch.unused]]
-name = "filecoin-hashers"
-version = "7.0.0"
-
-[[patch.unused]]
-name = "filecoin-proofs"
-version = "12.0.0"
-
-[[patch.unused]]
-name = "fr32"
-version = "5.0.0"
-
-[[patch.unused]]
-name = "sha2raw"
-version = "7.0.0"
-
-[[patch.unused]]
-name = "storage-proofs-core"
-version = "12.0.0"
-
-[[patch.unused]]
-name = "storage-proofs-porep"
-version = "12.0.0"
-
-[[patch.unused]]
-name = "storage-proofs-post"
-version = "12.0.0"
-
-[[patch.unused]]
-name = "storage-proofs-update"
-version = "12.0.0"
 
 [[patch.unused]]
 name = "wasmtime"
