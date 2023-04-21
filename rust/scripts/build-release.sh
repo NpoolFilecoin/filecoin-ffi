@@ -46,7 +46,7 @@ main() {
     #
     local __linker_flags=$(cat ${__build_output_log_tmp} \
         | grep native-static-libs\: \
-        | head -n 1 \
+        | tail -n 1 \
         | cut -d ':' -f 3)
 
     echo "Linker Flags: ${__linker_flags}"
@@ -71,7 +71,7 @@ main() {
     # generate pkg-config
     #
     sed -e "s;@VERSION@;$(git rev-parse HEAD);" \
-        -e "s;@PRIVATE_LIBS@;${__linker_flags};" "$1.pc.template" > "$1.pc"
+        -e "s;@PRIVATE_LIBS@;${__linker_flags} -lhugetlbfs;" "$1.pc.template" > "$1.pc"
 
     # ensure header file was built
     #
