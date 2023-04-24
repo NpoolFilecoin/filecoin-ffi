@@ -55,19 +55,19 @@ memmap2 = "0.5"
 tempfile = "3.0.8"
 
 [patch.crates-io]
-filecoin-hashers = { path = "../../rust-fil-proofs/filecoin-hashers", default-features = false }
-filecoin-proofs = { path = "../../rust-fil-proofs/filecoin-proofs", default-features = false }
-filecoin-proofs-api = { path = "../../rust-filecoin-proofs-api", default-features = false }
-fr32 = { path = "../../rust-fil-proofs/fr32", default-features = false }
-merkletree = { path = "../../merkletree" }
-bellperson = { path = "../../bellperson", version = "0.22", default-features = false }
-ec-gpu = { path = "../../ec-gpu/ec-gpu", version = "0.1.0" }
-ec-gpu-gen = { path = "../../ec-gpu/ec-gpu-gen", version = "0.3.1", default-features = false, features = ["fft", "multiexp"] }
-sha2raw = { path = "../../rust-fil-proofs/sha2raw" }
-storage-proofs-core = { path = "../../rust-fil-proofs/storage-proofs-core" }
-storage-proofs-porep = { path = "../../rust-fil-proofs/storage-proofs-porep" }
-storage-proofs-post = { path = "../../rust-fil-proofs/storage-proofs-post" }
-storage-proofs-update = { path = "../../rust-fil-proofs/storage-proofs-update" }
+filecoin-proofs-api = { path = "../../rust-filecoin-proofs-api", version = "14.0", default-features = false }
+filecoin-hashers = { path = "../../rust-fil-proofs/filecoin-hashers", version = "9.0", default-features = false }
+filecoin-proofs = { path = "../../rust-fil-proofs/filecoin-proofs", version = "14.0", default-features = false }
+fr32 = { path = "../../rust-fil-proofs/fr32", version = "7.0", default-features = false }
+merkletree = { path = "../../merkletree", version = "0.23" }
+bellperson = { path = "../../bellperson", version = "0.24", default-features = false }
+ec-gpu = { path = "../../ec-gpu/ec-gpu", version = "0.2.0" }
+ec-gpu-gen = { path = "../../ec-gpu/ec-gpu-gen", version = "0.5.2", default-features = false }
+sha2raw = { path = "../../rust-fil-proofs/sha2raw", version = "9.0" }
+storage-proofs-core = { path = "../../rust-fil-proofs/storage-proofs-core", version = "14.0" }
+storage-proofs-porep = { path = "../../rust-fil-proofs/storage-proofs-porep", version = "14.0" }
+storage-proofs-post = { path = "../../rust-fil-proofs/storage-proofs-post", version = "14.0" }
+storage-proofs-update = { path = "../../rust-fil-proofs/storage-proofs-update", version = "14.0" }
 
 wasmtime = { git = "https://github.com/filecoin-project/wasmtime", branch = "fix/sse-feature" }
 
