@@ -307,6 +307,7 @@ fn fvm_machine_execute_message(
 
         let events_root = events_root.map(|cid| cid.to_bytes().into_boxed_slice().into());
 
+        // TODO: Do something with the backtrace.
         Ok(FvmMachineExecuteResponse {
             exit_code: exit_code.value() as u64,
             return_val,
@@ -453,6 +454,7 @@ fn build_lotus_trace(
                     return_data: return_data.data,
                     codec: return_data.codec,
                 };
+
                 return Ok(new_trace);
             }
             ExecutionEvent::CallError(syscall_err) => {

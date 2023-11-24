@@ -9,7 +9,9 @@ package ffi
 // #include "./filcrypto.h"
 import "C"
 import (
+	"fmt"
 	"os"
+	"path"
 	"runtime"
 
 	"github.com/filecoin-project/go-state-types/proof"
@@ -24,6 +26,8 @@ import (
 
 	"github.com/filecoin-project/filecoin-ffi/cgo"
 )
+
+// var log = logging.Logger("ffi-proof")
 
 // VerifySeal returns true if the sealing operation from which its inputs were
 // derived was valid, and false if not.
@@ -291,6 +295,7 @@ func SealPreCommitPhase1(
 	minerID abi.ActorID,
 	ticket abi.SealRandomness,
 	pieces []abi.PieceInfo,
+	hasDeals bool,
 ) (phase1Output []byte, err error) {
 	sp, err := toFilRegisteredSealProof(proofType)
 	if err != nil {
@@ -317,6 +322,7 @@ func SealPreCommitPhase1(
 		&proverID,
 		&ticketBytes,
 		cgo.AsSliceRefPublicPieceInfo(filPublicPieceInfos),
+		cgo.AsBool(hasDeals),
 	)
 }
 
@@ -817,11 +823,36 @@ func toFilPrivateReplicaInfo(src PrivateSectorInfo) (cgo.PrivateReplicaInfo, err
 		return cgo.PrivateReplicaInfo{}, err
 	}
 
+	cacheOss := cgo.NewPrivateSectorPathInfo(
+		src.CacheSectorPathInfo.Endpoints,
+		src.CacheSectorPathInfo.AccessKey,
+		src.CacheSectorPathInfo.SecretKey,
+		src.CacheSectorPathInfo.BucketName,
+		src.CacheSectorPathInfo.LandedDir,
+		src.CacheSectorPathInfo.SectorName,
+		src.CacheSectorPathInfo.Region,
+		src.CacheSectorPathInfo.MultiRanges,
+	)
+	sealedOss := cgo.NewPrivateSectorPathInfo(
+		src.SealedSectorPathInfo.Endpoints,
+		src.SealedSectorPathInfo.AccessKey,
+		src.SealedSectorPathInfo.SecretKey,
+		src.SealedSectorPathInfo.BucketName,
+		src.SealedSectorPathInfo.LandedDir,
+		src.SealedSectorPathInfo.SectorName,
+		src.SealedSectorPathInfo.Region,
+		src.SealedSectorPathInfo.MultiRanges,
+	)
+
 	return cgo.NewPrivateReplicaInfo(
 		pp,
 		src.CacheDirPath,
+		src.CacheInOss,
+		cacheOss,
 		commR,
 		src.SealedSectorPath,
+		src.SealedInOss,
+		sealedOss,
 		uint64(src.SectorNumber),
 	), nil
 }
@@ -850,11 +881,36 @@ func toFilPrivateReplicaInfos(src []PrivateSectorInfo, typ string) ([]cgo.Privat
 			return nil, nil, err
 		}
 
+		cacheOss := cgo.NewPrivateSectorPathInfo(
+			src[idx].CacheSectorPathInfo.Endpoints,
+			src[idx].CacheSectorPathInfo.AccessKey,
+			src[idx].CacheSectorPathInfo.SecretKey,
+			src[idx].CacheSectorPathInfo.BucketName,
+			src[idx].CacheSectorPathInfo.LandedDir,
+			src[idx].CacheSectorPathInfo.SectorName,
+			src[idx].CacheSectorPathInfo.Region,
+			src[idx].CacheSectorPathInfo.MultiRanges,
+		)
+		sealedOss := cgo.NewPrivateSectorPathInfo(
+			src[idx].SealedSectorPathInfo.Endpoints,
+			src[idx].SealedSectorPathInfo.AccessKey,
+			src[idx].SealedSectorPathInfo.SecretKey,
+			src[idx].SealedSectorPathInfo.BucketName,
+			src[idx].SealedSectorPathInfo.LandedDir,
+			src[idx].SealedSectorPathInfo.SectorName,
+			src[idx].SealedSectorPathInfo.Region,
+			src[idx].SealedSectorPathInfo.MultiRanges,
+		)
+
 		out[idx] = cgo.NewPrivateReplicaInfo(
 			pp,
 			src[idx].CacheDirPath,
+			src[idx].CacheInOss,
+			cacheOss,
 			commR,
 			src[idx].SealedSectorPath,
+			src[idx].SealedInOss,
+			sealedOss,
 			uint64(src[idx].SectorNumber),
 		)
 	}
@@ -1093,4 +1149,28 @@ func toVanillaProofs(src [][]byte) ([]cgo.SliceBoxedUint8, func()) {
 	}
 
 	return out, makeCleanerSBU(out, len(src))
+}
+
+func InitLog() {
+	gofile := os.Getenv("GOLOG_FILE")
+	file := os.Getenv("RUSTLOG_FILE")
+	if len(file) == 0 {
+		if 0 < len(gofile) {
+			file = fmt.Sprintf("%v/rust-%v", path.Dir(gofile), path.Base(gofile))
+		} else {
+			file = "/var/log/lotus/rust-log.log"
+		}
+	}
+	if len(file) == 0 {
+		fmt.Printf("FFI log filename is not given\n")
+		return
+	}
+	filLogFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Printf("CANNOT open FFI log file %v: %v\n", file, err)
+		return
+	}
+	cgo.InitLogFd(int32(filLogFile.Fd()))
+	// syscall.Dup2(int(filLogFile.Fd()), 1)
+	// syscall.Dup2(int(filLogFile.Fd()), 2)
 }

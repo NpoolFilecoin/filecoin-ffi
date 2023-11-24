@@ -1,18 +1,18 @@
 [package]
-name = "filcrypto"
-description = "FFI Interface to Filecoin Proofs"
-version = "0.7.5"
 authors = [
   "nemo <nemo@protocol.ai>",
   "dignifiedquire <me@dignifiedquire.com>",
-  "laser <l@s3r.com>"
+  "laser <l@s3r.com>",
 ]
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/filecoin-project/filecoin-ffi"
-readme = "README.md"
+description = "FFI Interface to Filecoin Proofs"
 edition = "2021"
-resolver = "2"
+license = "MIT OR Apache-2.0"
+name = "filcrypto"
 publish = false
+readme = "README.md"
+repository = "https://github.com/EntropyPool/filecoin-ffi"
+resolver = "2"
+version = "0.7.5"
 
 [lib]
 crate-type = ["rlib", "staticlib"]
@@ -52,6 +52,20 @@ filecoin-proofs-api = { version = "16.0", default-features = false }
 [dev-dependencies]
 memmap2 = "0.5"
 tempfile = "3.0.8"
+
+[patch.crates-io]
+filecoin-proofs-api = { path = "../../rust-filecoin-proofs-api", version = "16.0", default-features = false }
+filecoin-hashers = { path = "../../rust-fil-proofs/filecoin-hashers", version = "11.0", default-features = false }
+filecoin-proofs = { path = "../../rust-fil-proofs/filecoin-proofs", version = "16.0", default-features = false }
+fr32 = { path = "../../rust-fil-proofs/fr32", version = "9.0", default-features = false }
+merkletree = { path = "../../merkletree", version = "0.23" }
+sha2raw = { path = "../../rust-fil-proofs/sha2raw", version = "11.0" }
+storage-proofs-core = { path = "../../rust-fil-proofs/storage-proofs-core", version = "16.0" }
+storage-proofs-porep = { path = "../../rust-fil-proofs/storage-proofs-porep", version = "16.0" }
+storage-proofs-post = { path = "../../rust-fil-proofs/storage-proofs-post", version = "16.0" }
+storage-proofs-update = { path = "../../rust-fil-proofs/storage-proofs-update", version = "16.0" }
+
+wasmtime = { git = "https://github.com/filecoin-project/wasmtime", branch = "fix/sse-feature" }
 
 [features]
 default = ["cuda", "multicore-sdr" ]
