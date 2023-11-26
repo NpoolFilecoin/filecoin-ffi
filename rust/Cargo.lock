@@ -4215,7 +4215,7 @@ dependencies = [
  "chacha20",
  "crossbeam",
  "dashmap",
- "ec-gpu-gen 0.6.0",
+ "ec-gpu-gen 0.7.0",
  "errno 0.2.8",
  "fdlimit",
  "ff",
