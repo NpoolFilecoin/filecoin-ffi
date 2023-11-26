@@ -1104,19 +1104,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashmap"
-version = "5.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "978747c1d849a7d2ee5e8adc0159961c48fb7e5db2f06af6723b80123bb53856"
-dependencies = [
- "cfg-if 1.0.0",
- "hashbrown 0.14.3",
- "lock_api",
- "once_cell",
- "parking_lot_core",
-]
-
-[[package]]
 name = "data-encoding"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1534,6 +1521,16 @@ dependencies = [
  "serde_json",
  "serde_tuple",
  "tempfile",
+]
+
+[[package]]
+name = "file-lock"
+version = "2.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec788ff423b138c9c5faf201347926573b605c517fb1c5a56aa632b218bf47bb"
+dependencies = [
+ "cc",
+ "libc",
 ]
 
 [[package]]
@@ -4214,10 +4211,11 @@ dependencies = [
  "byteorder",
  "chacha20",
  "crossbeam",
- "dashmap",
+ "ec-gpu-gen 0.7.0",
  "errno 0.2.8",
  "fdlimit",
  "ff",
+ "file-lock",
  "filecoin-hashers",
  "fr32",
  "generic-array 0.14.7",
@@ -4234,7 +4232,6 @@ dependencies = [
  "num_cpus",
  "pretty_assertions",
  "rayon",
- "rust-gpu-tools",
  "rustversion",
  "serde",
  "serde_json",
