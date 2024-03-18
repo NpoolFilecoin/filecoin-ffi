@@ -1260,19 +1260,6 @@ fn clear_synthetic_proofs(
     })
 }
 
-<<<<<<< HEAD
-=======
-#[ffi_export]
-fn clear_layer_data(
-    sector_size: u64,
-    cache_dir_path: c_slice::Ref<u8>,
-) -> repr_c::Box<ClearCacheResponse> {
-    catch_panic_response("clear_layer_data", || {
-        seal::clear_layer_data(sector_size, &as_path_buf(&cache_dir_path)?)
-    })
-}
-
->>>>>>> entropy-v1.24.0
 /// Returns the number of user bytes that will fit into a staged sector.
 #[ffi_export]
 fn get_max_user_bytes_per_staged_sector(registered_proof: RegisteredSealProof) -> u64 {
@@ -1902,11 +1889,7 @@ pub mod tests {
 
                 destroy_generate_synth_proofs_response(resp_p1);
 
-<<<<<<< HEAD
                 let resp_clear = clear_cache(
-=======
-                let resp_clear = clear_layer_data(
->>>>>>> entropy-v1.24.0
                     api::RegisteredSealProof::from(registered_proof_seal)
                         .sector_size()
                         .0,
@@ -1914,11 +1897,7 @@ pub mod tests {
                 );
                 if resp_clear.status_code != FCPResponseStatus::NoError {
                     let msg = str::from_utf8(&resp_clear.error_msg).unwrap();
-<<<<<<< HEAD
                     panic!("clear_cache failed: {:?}", msg);
-=======
-                    panic!("clear_layer_data failed: {:?}", msg);
->>>>>>> entropy-v1.24.0
                 }
                 destroy_clear_cache_response(resp_clear);
             }

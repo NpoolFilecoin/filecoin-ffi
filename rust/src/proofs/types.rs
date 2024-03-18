@@ -478,8 +478,6 @@ pub type GenerateTreeRLastResponse = Result<[u8; 32]>;
 
 pub type GenerateTreeCResponse = Result<[u8; 32]>;
 
-<<<<<<< HEAD
-=======
 #[derive(Debug)]
 pub struct PrivateReplicaInfoTmp {
     pub registered_proof: RegisteredPoStProof,
@@ -493,7 +491,6 @@ pub struct PrivateReplicaInfoTmp {
     pub sector_id: u64,
 }
 
->>>>>>> entropy-v1.24.0
 #[derive_ReprC]
 #[repr(C)]
 pub struct SealPreCommitPhase2 {
