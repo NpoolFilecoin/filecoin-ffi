@@ -7,8 +7,12 @@ use fvm4::executor::ApplyKind;
 use fvm4::gas::GasCharge;
 use fvm4::trace::ExecutionEvent;
 use fvm4_shared::address::Address;
+<<<<<<< HEAD
 use fvm4_shared::state::ActorState;
 use fvm4_shared::{ActorID, MethodNum};
+=======
+use fvm4_shared::MethodNum;
+>>>>>>> entropy-v1.24.0
 use fvm_ipld_encoding::ipld_block::IpldBlock;
 use fvm_ipld_encoding::tuple::{Deserialize_tuple, Serialize_tuple};
 use fvm_ipld_encoding::{strict_bytes, to_vec, CborStore};
@@ -308,6 +312,7 @@ fn fvm_machine_execute_message(
 
         let events_root = events_root.map(|cid| cid.to_bytes().into_boxed_slice().into());
 
+        // TODO: Do something with the backtrace.
         Ok(FvmMachineExecuteResponse {
             exit_code: exit_code.value() as u64,
             return_val,
@@ -386,12 +391,16 @@ pub struct TraceMessage {
     pub codec: u64,
     pub gas_limit: u64,
     pub read_only: bool,
+<<<<<<< HEAD
 }
 
 #[derive(Serialize_tuple, Deserialize_tuple, Debug, PartialEq, Eq, Clone)]
 pub struct TraceActor {
     pub actor_id: ActorID,
     pub actor_state: ActorState,
+=======
+    pub code_cid: Cid,
+>>>>>>> entropy-v1.24.0
 }
 
 #[derive(Serialize_tuple, Deserialize_tuple, Debug, PartialEq, Eq, Clone)]
@@ -424,6 +433,10 @@ fn build_lotus_trace(
             codec: params.codec,
             gas_limit,
             read_only,
+<<<<<<< HEAD
+=======
+            code_cid: Cid::default(),
+>>>>>>> entropy-v1.24.0
         },
         msg_invoked: None,
         msg_ret: TraceReturn {
@@ -450,11 +463,16 @@ fn build_lotus_trace(
                     from, to, method, params, value, gas_limit, read_only, trace_iter,
                 )?);
             }
+<<<<<<< HEAD
             ExecutionEvent::InvokeActor { id, state } => {
                 new_trace.msg_invoked = Some(TraceActor {
                     actor_id: id,
                     actor_state: state,
                 })
+=======
+            ExecutionEvent::InvokeActor(cid) => {
+                new_trace.msg.code_cid = cid;
+>>>>>>> entropy-v1.24.0
             }
             ExecutionEvent::CallReturn(exit_code, return_data) => {
                 let return_data = return_data.unwrap_or_default();
@@ -463,6 +481,7 @@ fn build_lotus_trace(
                     return_data: return_data.data,
                     codec: return_data.codec,
                 };
+
                 return Ok(new_trace);
             }
             ExecutionEvent::CallError(syscall_err) => {

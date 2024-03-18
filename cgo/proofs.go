@@ -93,8 +93,18 @@ func WriteWithoutAlignment(registeredProof RegisteredSealProof, srcFd int32, src
 	return uint64(resp.value.total_write_unpadded), resp.value.comm_p.copy(), nil
 }
 
-func SealPreCommitPhase1(registeredProof RegisteredSealProof, cacheDirPath SliceRefUint8, stagedSectorPath SliceRefUint8, sealedSectorPath SliceRefUint8, sectorId uint64, proverId *ByteArray32, ticket *ByteArray32, pieces SliceRefPublicPieceInfo) ([]byte, error) {
-	resp := C.seal_pre_commit_phase1(registeredProof, cacheDirPath, stagedSectorPath, sealedSectorPath, C.uint64_t(sectorId), proverId, ticket, pieces)
+func SealPreCommitPhase1(
+	registeredProof RegisteredSealProof,
+	cacheDirPath SliceRefUint8,
+	stagedSectorPath SliceRefUint8,
+	sealedSectorPath SliceRefUint8,
+	sectorId uint64,
+	proverId *ByteArray32,
+	ticket *ByteArray32,
+	pieces SliceRefPublicPieceInfo,
+	hasDeal C.bool,
+) ([]byte, error) {
+	resp := C.seal_pre_commit_phase1(registeredProof, cacheDirPath, stagedSectorPath, sealedSectorPath, C.uint64_t(sectorId), proverId, ticket, pieces, hasDeal)
 	defer resp.destroy()
 	if err := CheckErr(resp); err != nil {
 		return nil, err

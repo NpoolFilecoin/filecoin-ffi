@@ -135,6 +135,14 @@ jobs:
       - configure_environment_variables
       - prepare
       - publish_release
+  publish_linux_aarch64_staticlib:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: arm.large
+    steps:
+      - configure_environment_variables
+      - prepare
+      - publish_release
   publish_darwin_staticlib:
     macos:
       xcode: "12.5.1"

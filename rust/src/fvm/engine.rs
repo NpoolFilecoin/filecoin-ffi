@@ -74,7 +74,11 @@ impl TryFrom<u32> for EngineVersion {
         match value {
             16 | 17 => Ok(EngineVersion::V1),
             18 | 19 | 20 => Ok(EngineVersion::V2),
+<<<<<<< HEAD
             21 | 22 => Ok(EngineVersion::V3),
+=======
+            21 => Ok(EngineVersion::V3),
+>>>>>>> entropy-v1.24.0
             _ => return Err(anyhow!("network version not supported")),
         }
     }
@@ -164,8 +168,13 @@ mod v4 {
         ApplyKind, ApplyRet, DefaultExecutor as DefaultExecutor4,
         ThreadedExecutor as ThreadedExecutor4,
     };
+<<<<<<< HEAD
     use fvm4::kernel::filecoin::DefaultFilecoinKernel as DefaultFilecoinKernel4;
     use fvm4::machine::{DefaultMachine as DefaultMachine4, NetworkConfig};
+=======
+    use fvm4::machine::{DefaultMachine as DefaultMachine4, NetworkConfig};
+    use fvm4::DefaultKernel as DefaultKernel4;
+>>>>>>> entropy-v1.24.0
     use fvm4_shared::{chainid::ChainID, clock::ChainEpoch, message::Message};
 
     use crate::fvm::engine::{
@@ -175,7 +184,11 @@ mod v4 {
     use super::Config;
 
     type CgoMachine4 = DefaultMachine4<CgoBlockstore, CgoExterns>;
+<<<<<<< HEAD
     type BaseExecutor4 = DefaultExecutor4<DefaultFilecoinKernel4<DefaultCallManager4<CgoMachine4>>>;
+=======
+    type BaseExecutor4 = DefaultExecutor4<DefaultKernel4<DefaultCallManager4<CgoMachine4>>>;
+>>>>>>> entropy-v1.24.0
     type CgoExecutor4 = ThreadedExecutor4<BaseExecutor4>;
 
     fn new_executor(
@@ -274,7 +287,11 @@ mod v3 {
     use fvm4::trace::ExecutionEvent;
     use fvm4_shared::{
         address::Address, econ::TokenAmount, error::ErrorNumber, error::ExitCode, message::Message,
+<<<<<<< HEAD
         receipt::Receipt, state::ActorState,
+=======
+        receipt::Receipt,
+>>>>>>> entropy-v1.24.0
     };
 
     use crate::fvm::engine::{
@@ -427,6 +444,7 @@ mod v3 {
                                         .unwrap_or(ErrorNumber::AssertionFailed),
                                 )))
                             }
+<<<<<<< HEAD
                             ExecutionEvent3::InvokeActor { id, state } => {
                                 Some(ExecutionEvent::InvokeActor {
                                     id,
@@ -444,6 +462,10 @@ mod v3 {
                                             .and_then(|a| Address::from_bytes(&a.to_bytes()).ok()),
                                     },
                                 })
+=======
+                            ExecutionEvent3::InvokeActor(cid) => {
+                                Some(ExecutionEvent::InvokeActor(cid))
+>>>>>>> entropy-v1.24.0
                             }
                             _ => None,
                         })

@@ -3,8 +3,8 @@ use std::fs;
 use blstrs::Scalar as Fr;
 use filecoin_proofs_api::seal;
 use filecoin_proofs_api::{
-    self as api, update, PieceInfo, SectorId, StorageProofsError, UnpaddedByteIndex,
-    UnpaddedBytesAmount,
+    self as api, update, PieceInfo, PrivateSectorPathInfo as api_PrivateSectorPathInfo, SectorId,
+    StorageProofsError, UnpaddedByteIndex, UnpaddedBytesAmount,
 };
 use rayon::prelude::*;
 use safer_ffi::prelude::*;
@@ -25,6 +25,8 @@ fn alloc_boxed_slice(size: usize) -> c_slice::Box<u8> {
 fn destroy_boxed_slice(ptr: c_slice::Box<u8>) {
     drop(ptr);
 }
+
+use crate::util::api::init_log;
 
 // A byte serialized representation of a vanilla proof.
 pub type ApiVanillaProof = Vec<u8>;
@@ -130,8 +132,10 @@ fn seal_pre_commit_phase1(
     prover_id: &[u8; 32],
     ticket: &[u8; 32],
     pieces: c_slice::Ref<PublicPieceInfo>,
+    has_deals: bool,
 ) -> repr_c::Box<SealPreCommitPhase1Response> {
     catch_panic_response("seal_pre_commit_phase1", || {
+        init_log();
         let public_pieces: Vec<PieceInfo> = pieces.iter().map(Into::into).collect();
 
         let result = seal::seal_pre_commit_phase1(
@@ -143,6 +147,7 @@ fn seal_pre_commit_phase1(
             SectorId::from(sector_id),
             *ticket,
             &public_pieces,
+            has_deals,
         )?;
         let result = serde_json::to_vec(&result)?;
 
@@ -543,20 +548,65 @@ fn generate_single_vanilla_proof(
     challenges: c_slice::Ref<u64>,
 ) -> repr_c::Box<GenerateSingleVanillaProofResponse> {
     catch_panic_response("generate_single_vanilla_proof", || {
-        let sector_id = SectorId::from(replica.sector_id);
-        let cache_dir_path = as_path_buf(&replica.cache_dir_path)?;
-        let replica_path = as_path_buf(&replica.replica_path)?;
+        // let replica_v1 = api::PrivateReplicaInfo::new(
+        //     replica.registered_proof.into(),
+        //     replica.comm_r,
+        //     cache_dir_path,
+        //     replica_path,
+        // );
 
-        let replica_v1 = api::PrivateReplicaInfo::new(
-            replica.registered_proof.into(),
-            replica.comm_r,
+        let PrivateReplicaInfo {
+            registered_proof,
             cache_dir_path,
+            cache_in_oss,
+            cache_sector_path_info,
+            comm_r,
             replica_path,
+            replica_in_oss,
+            replica_sector_path_info,
+            sector_id,
+        } = replica;
+
+        let sector_id = SectorId::from(sector_id);
+        let cache_dir_path = as_path_buf(&cache_dir_path)?;
+        let replica_path = as_path_buf(&replica_path)?;
+
+        let api_replica_sector_path_info = api_PrivateSectorPathInfo {
+            endpoints: String::from_utf8(replica_sector_path_info.endpoints.to_vec()).unwrap(),
+            landed_dir: as_path_buf(&replica_sector_path_info.landed_dir).unwrap(),
+            access_key: String::from_utf8(replica_sector_path_info.access_key.to_vec()).unwrap(),
+            secret_key: String::from_utf8(replica_sector_path_info.secret_key.to_vec()).unwrap(),
+            bucket_name: String::from_utf8(replica_sector_path_info.bucket_name.to_vec()).unwrap(),
+            sector_name: String::from_utf8(replica_sector_path_info.sector_name.to_vec()).unwrap(),
+            region: String::from_utf8(replica_sector_path_info.region.to_vec()).unwrap(),
+            multi_ranges: replica_sector_path_info.multi_ranges,
+        };
+
+        let api_cache_sector_path_info = api_PrivateSectorPathInfo {
+            endpoints: String::from_utf8(cache_sector_path_info.endpoints.to_vec()).unwrap(),
+            landed_dir: as_path_buf(&cache_sector_path_info.landed_dir).unwrap(),
+            access_key: String::from_utf8(cache_sector_path_info.access_key.to_vec()).unwrap(),
+            secret_key: String::from_utf8(cache_sector_path_info.secret_key.to_vec()).unwrap(),
+            bucket_name: String::from_utf8(cache_sector_path_info.bucket_name.to_vec()).unwrap(),
+            sector_name: String::from_utf8(cache_sector_path_info.sector_name.to_vec()).unwrap(),
+            region: String::from_utf8(cache_sector_path_info.region.to_vec()).unwrap(),
+            multi_ranges: cache_sector_path_info.multi_ranges,
+        };
+
+        let replica_v1 = api::PrivateReplicaInfo::new_with_oss_config(
+            registered_proof.into(),
+            replica_path,
+            replica_in_oss,
+            api_replica_sector_path_info,
+            comm_r,
+            cache_dir_path,
+            cache_in_oss,
+            api_cache_sector_path_info,
         );
 
         let result = filecoin_proofs_api::post::generate_single_vanilla_proof(
             replica.registered_proof.into(),
-            sector_id,
+            SectorId::from(replica.sector_id),
             &replica_v1,
             &challenges,
         )?;
@@ -1210,6 +1260,19 @@ fn clear_synthetic_proofs(
     })
 }
 
+<<<<<<< HEAD
+=======
+#[ffi_export]
+fn clear_layer_data(
+    sector_size: u64,
+    cache_dir_path: c_slice::Ref<u8>,
+) -> repr_c::Box<ClearCacheResponse> {
+    catch_panic_response("clear_layer_data", || {
+        seal::clear_layer_data(sector_size, &as_path_buf(&cache_dir_path)?)
+    })
+}
+
+>>>>>>> entropy-v1.24.0
 /// Returns the number of user bytes that will fit into a staged sector.
 #[ffi_export]
 fn get_max_user_bytes_per_staged_sector(registered_proof: RegisteredSealProof) -> u64 {
@@ -1789,6 +1852,7 @@ pub mod tests {
                 &prover_id,
                 &ticket,
                 pieces[..].into(),
+                false,
             );
 
             let resp_b2 = seal_pre_commit_phase2(
@@ -1838,7 +1902,11 @@ pub mod tests {
 
                 destroy_generate_synth_proofs_response(resp_p1);
 
+<<<<<<< HEAD
                 let resp_clear = clear_cache(
+=======
+                let resp_clear = clear_layer_data(
+>>>>>>> entropy-v1.24.0
                     api::RegisteredSealProof::from(registered_proof_seal)
                         .sector_size()
                         .0,
@@ -1846,7 +1914,11 @@ pub mod tests {
                 );
                 if resp_clear.status_code != FCPResponseStatus::NoError {
                     let msg = str::from_utf8(&resp_clear.error_msg).unwrap();
+<<<<<<< HEAD
                     panic!("clear_cache failed: {:?}", msg);
+=======
+                    panic!("clear_layer_data failed: {:?}", msg);
+>>>>>>> entropy-v1.24.0
                 }
                 destroy_clear_cache_response(resp_clear);
             }
@@ -2324,8 +2396,30 @@ pub mod tests {
             let private_replicas = vec![PrivateReplicaInfo {
                 registered_proof: registered_proof_winning_post,
                 cache_dir_path: cache_dir_path_ref.to_vec().into_boxed_slice().into(),
+                cache_in_oss: false,
+                cache_sector_path_info: PrivateSectorPathInfo {
+                    endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    multi_ranges: false,
+                },
                 comm_r: resp_b2.comm_r,
                 replica_path: sealed_path_ref.to_vec().into_boxed_slice().into(),
+                replica_in_oss: false,
+                replica_sector_path_info: PrivateSectorPathInfo {
+                    endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    multi_ranges: false,
+                },
                 sector_id,
             }];
 
@@ -2447,8 +2541,30 @@ pub mod tests {
             let private_replicas = vec![PrivateReplicaInfo {
                 registered_proof: registered_proof_window_post,
                 cache_dir_path: cache_dir_path_ref.to_vec().into_boxed_slice().into(),
+                cache_in_oss: false,
+                cache_sector_path_info: PrivateSectorPathInfo {
+                    endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    multi_ranges: false,
+                },
                 comm_r: resp_b2.comm_r,
                 replica_path: sealed_path_ref.to_vec().into_boxed_slice().into(),
+                replica_in_oss: false,
+                replica_sector_path_info: PrivateSectorPathInfo {
+                    endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    multi_ranges: false,
+                },
                 sector_id,
             }];
 
@@ -2486,8 +2602,30 @@ pub mod tests {
             let legacy_private_replicas = vec![PrivateReplicaInfo {
                 registered_proof: legacy_registered_proof_window_post,
                 cache_dir_path: cache_dir_path_ref.to_vec().into_boxed_slice().into(),
+                cache_in_oss: false,
+                cache_sector_path_info: PrivateSectorPathInfo {
+                    endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    multi_ranges: false,
+                },
                 comm_r: resp_b2.comm_r,
                 replica_path: sealed_path_ref.to_vec().into_boxed_slice().into(),
+                replica_in_oss: false,
+                replica_sector_path_info: PrivateSectorPathInfo {
+                    endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    multi_ranges: false,
+                },
                 sector_id,
             }];
 
@@ -2558,15 +2696,59 @@ pub mod tests {
                 PrivateReplicaInfo {
                     registered_proof: registered_proof_window_post,
                     cache_dir_path: cache_dir_path_ref.to_vec().into_boxed_slice().into(),
+                    cache_in_oss: false,
+                    cache_sector_path_info: PrivateSectorPathInfo {
+                        endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        multi_ranges: false,
+                    },
                     comm_r: resp_b2.comm_r,
                     replica_path: sealed_path_ref.to_vec().into_boxed_slice().into(),
+                    replica_in_oss: false,
+                    replica_sector_path_info: PrivateSectorPathInfo {
+                        endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        multi_ranges: false,
+                    },
                     sector_id,
                 },
                 PrivateReplicaInfo {
                     registered_proof: registered_proof_window_post,
                     cache_dir_path: cache_dir_path_ref.to_vec().into_boxed_slice().into(),
+                    cache_in_oss: false,
+                    cache_sector_path_info: PrivateSectorPathInfo {
+                        endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        multi_ranges: false,
+                    },
                     comm_r: resp_b2.comm_r,
                     replica_path: sealed_path_ref.to_vec().into_boxed_slice().into(),
+                    replica_in_oss: false,
+                    replica_sector_path_info: PrivateSectorPathInfo {
+                        endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                        multi_ranges: false,
+                    },
                     sector_id: sector_id2,
                 },
             ];
@@ -2905,6 +3087,7 @@ pub mod tests {
                 &prover_id,
                 &ticket,
                 pieces[..].into(),
+                false,
             );
 
             if resp_b1.status_code != FCPResponseStatus::NoError {
@@ -2931,8 +3114,30 @@ pub mod tests {
             let private_replicas = vec![PrivateReplicaInfo {
                 registered_proof: registered_proof_window_post,
                 cache_dir_path: cache_dir_path_ref.to_vec().into_boxed_slice().into(),
+                cache_in_oss: false,
+                cache_sector_path_info: PrivateSectorPathInfo {
+                    endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    multi_ranges: false,
+                },
                 comm_r: resp_b2.comm_r,
                 replica_path: faulty_sealed_path_ref.to_vec().into_boxed_slice().into(),
+                replica_in_oss: false,
+                replica_sector_path_info: PrivateSectorPathInfo {
+                    endpoints: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    access_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    secret_key: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    bucket_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    landed_dir: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    sector_name: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    region: Vec::from("".as_bytes()).into_boxed_slice().into(),
+                    multi_ranges: false,
+                },
                 sector_id,
             }];
 
@@ -3094,6 +3299,7 @@ pub mod tests {
                 &prover_id,
                 &ticket,
                 pieces[..].into(),
+                false,
             );
 
             if resp_b1.status_code != FCPResponseStatus::NoError {

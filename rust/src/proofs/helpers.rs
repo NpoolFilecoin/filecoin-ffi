@@ -2,10 +2,18 @@ use std::collections::btree_map::BTreeMap;
 
 use anyhow::Result;
 use filecoin_proofs_api::{self as api, SectorId};
+use filecoin_proofs_api::{
+    PrivateReplicaInfo as api_PrivateReplicaInfo,
+    PrivateSectorPathInfo as api_PrivateSectorPathInfo,
+    // PublicReplicaInfo as api_PublicReplicaInfo,
+};
 use safer_ffi::prelude::*;
 
-use super::types::{PrivateReplicaInfo, PublicReplicaInfo, RegisteredPoStProof};
 use crate::util::types::as_path_buf;
+
+use super::types::{
+    PrivateReplicaInfo, PrivateReplicaInfoTmp, PublicReplicaInfo, RegisteredPoStProof,
+};
 
 #[derive(Debug, Clone)]
 struct PublicReplicaInfoTmp {
@@ -45,15 +53,6 @@ pub fn to_public_replica_info_map(
         .collect()
 }
 
-#[derive(Debug, Clone)]
-struct PrivateReplicaInfoTmp {
-    pub registered_proof: RegisteredPoStProof,
-    pub cache_dir_path: std::path::PathBuf,
-    pub comm_r: [u8; 32],
-    pub replica_path: std::path::PathBuf,
-    pub sector_id: u64,
-}
-
 pub fn to_private_replica_info_map(
     replicas: c_slice::Ref<PrivateReplicaInfo>,
 ) -> Result<BTreeMap<SectorId, api::PrivateReplicaInfo>> {
@@ -62,14 +61,15 @@ pub fn to_private_replica_info_map(
     let replicas: Vec<_> = replicas
         .iter()
         .map(|ffi_info| {
-            let cache_dir_path = as_path_buf(&ffi_info.cache_dir_path)?;
-            let replica_path = as_path_buf(&ffi_info.replica_path)?;
-
             Ok(PrivateReplicaInfoTmp {
                 registered_proof: ffi_info.registered_proof,
-                cache_dir_path,
+                cache_dir_path: as_path_buf(&ffi_info.cache_dir_path).unwrap(),
+                cache_in_oss: ffi_info.cache_in_oss,
+                cache_sector_path_info: ffi_info.cache_sector_path_info.clone(),
                 comm_r: ffi_info.comm_r,
-                replica_path,
+                replica_path: as_path_buf(&ffi_info.replica_path).unwrap(),
+                replica_in_oss: ffi_info.replica_in_oss,
+                replica_sector_path_info: ffi_info.replica_sector_path_info.clone(),
                 sector_id: ffi_info.sector_id,
             })
         })
@@ -81,18 +81,54 @@ pub fn to_private_replica_info_map(
             let PrivateReplicaInfoTmp {
                 registered_proof,
                 cache_dir_path,
+                cache_in_oss,
+                cache_sector_path_info,
                 comm_r,
                 replica_path,
+                replica_in_oss,
+                replica_sector_path_info,
                 sector_id,
             } = info;
 
+            let api_replica_sector_path_info = api_PrivateSectorPathInfo {
+                endpoints: String::from_utf8(replica_sector_path_info.endpoints.to_vec()).unwrap(),
+                landed_dir: as_path_buf(&replica_sector_path_info.landed_dir).unwrap(),
+                access_key: String::from_utf8(replica_sector_path_info.access_key.to_vec())
+                    .unwrap(),
+                secret_key: String::from_utf8(replica_sector_path_info.secret_key.to_vec())
+                    .unwrap(),
+                bucket_name: String::from_utf8(replica_sector_path_info.bucket_name.to_vec())
+                    .unwrap(),
+                sector_name: String::from_utf8(replica_sector_path_info.sector_name.to_vec())
+                    .unwrap(),
+                region: String::from_utf8(replica_sector_path_info.region.to_vec()).unwrap(),
+                multi_ranges: replica_sector_path_info.multi_ranges,
+            };
+
+            let api_cache_sector_path_info = api_PrivateSectorPathInfo {
+                endpoints: String::from_utf8(cache_sector_path_info.endpoints.to_vec()).unwrap(),
+                landed_dir: as_path_buf(&cache_sector_path_info.landed_dir).unwrap(),
+                access_key: String::from_utf8(cache_sector_path_info.access_key.to_vec()).unwrap(),
+                secret_key: String::from_utf8(cache_sector_path_info.secret_key.to_vec()).unwrap(),
+                bucket_name: String::from_utf8(cache_sector_path_info.bucket_name.to_vec())
+                    .unwrap(),
+                sector_name: String::from_utf8(cache_sector_path_info.sector_name.to_vec())
+                    .unwrap(),
+                region: String::from_utf8(cache_sector_path_info.region.to_vec()).unwrap(),
+                multi_ranges: cache_sector_path_info.multi_ranges,
+            };
+
             (
                 SectorId::from(sector_id),
-                api::PrivateReplicaInfo::new(
+                api_PrivateReplicaInfo::new_with_oss_config(
                     registered_proof.into(),
+                    replica_path,
+                    replica_in_oss,
+                    api_replica_sector_path_info,
                     comm_r,
                     cache_dir_path,
-                    replica_path,
+                    cache_in_oss,
+                    api_cache_sector_path_info,
                 ),
             )
         })
