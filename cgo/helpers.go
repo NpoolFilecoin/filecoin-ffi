@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	emptyBool               C.bool                 = false
 	emptyUint8              C.uint8_t              = 0
 	emptyUint64             C.uint64_t             = 0
 	emptyUint               C.size_t               = 0
@@ -24,6 +25,13 @@ var (
 	emptyByteArray32        C.uint8_32_array_t     = C.uint8_32_array_t{}
 	emptySliceBoxedUint8    C.slice_boxed_uint8_t  = C.slice_boxed_uint8_t{}
 )
+
+func AsBool(bl bool) C.bool {
+	if bl {
+		return !emptyBool
+	}
+	return emptyBool
+}
 
 func AsSliceRefUint8(goBytes []byte) SliceRefUint8 {
 	len := len(goBytes)
@@ -235,13 +243,49 @@ func NewAggregationInputs(commR ByteArray32, commD ByteArray32, sectorId uint64,
 	}
 }
 
-func NewPrivateReplicaInfo(pp RegisteredPoStProof, cacheDirPath string, commR ByteArray32, replicaPath string, sectorId uint64) PrivateReplicaInfo {
+func NewPrivateSectorPathInfo(
+	endpoints string,
+	accessKey string,
+	secretKey string,
+	bucketName string,
+	landedDir string,
+	sectorName string,
+	region string,
+	multiRanges bool,
+) PrivateSectorPathInfo {
+	return PrivateSectorPathInfo{
+		endpoints:    AllocSliceBoxedUint8([]byte(endpoints)),
+		access_key:   AllocSliceBoxedUint8([]byte(accessKey)),
+		secret_key:   AllocSliceBoxedUint8([]byte(secretKey)),
+		bucket_name:  AllocSliceBoxedUint8([]byte(bucketName)),
+		landed_dir:   AllocSliceBoxedUint8([]byte(landedDir)),
+		sector_name:  AllocSliceBoxedUint8([]byte(sectorName)),
+		region:       AllocSliceBoxedUint8([]byte(region)),
+		multi_ranges: AsBool(multiRanges),
+	}
+}
+
+func NewPrivateReplicaInfo(
+	pp RegisteredPoStProof,
+	cacheDirPath string,
+	cacheInOss bool,
+	cacheSectorPathInfo PrivateSectorPathInfo,
+	commR ByteArray32,
+	replicaPath string,
+	replicaInOss bool,
+	replicaSectorPathInfo PrivateSectorPathInfo,
+	sectorId uint64,
+) PrivateReplicaInfo {
 	return PrivateReplicaInfo{
-		registered_proof: pp,
-		cache_dir_path:   AllocSliceBoxedUint8([]byte(cacheDirPath)),
-		replica_path:     AllocSliceBoxedUint8([]byte(replicaPath)),
-		sector_id:        C.uint64_t(sectorId),
-		comm_r:           commR,
+		registered_proof:         pp,
+		cache_dir_path:           AllocSliceBoxedUint8([]byte(cacheDirPath)),
+		cache_in_oss:             AsBool(cacheInOss),
+		cache_sector_path_info:   cacheSectorPathInfo,
+		replica_path:             AllocSliceBoxedUint8([]byte(replicaPath)),
+		replica_in_oss:           AsBool(replicaInOss),
+		replica_sector_path_info: replicaSectorPathInfo,
+		sector_id:                C.uint64_t(sectorId),
+		comm_r:                   commR,
 	}
 }
 
